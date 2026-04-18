@@ -21,7 +21,7 @@
         <div class="font-bold text-lg tracking-tighter">User_Database.sys</div>
         <div class="flex gap-6">
             <span class="text-zinc-500">Total Records: 04</span>
-            <a href="#" class="hover:line-through text-white">+ Add New User</a>
+            <a href="/user/create" class="hover:line-through text-white">+ Add New User</a>
         </div>
     </nav>
 
@@ -55,8 +55,10 @@
                         <td class="p-6">
                             <span class="text-[9px] border border-green-500/50 text-green-500 px-2 py-0.5 uppercase">Active</span>
                         </td>
-                        <td class="p-6 text-right">
-                            <button class="text-[10px] uppercase hover:line-through">Edit</button>
+                        <td class="p-6 text-right space-x-4 text-sm text-zinc-400 italic">
+                            <button class="text-[10px] uppercase hover:line-through" onclick="window.location.href='/user/destroy/{{ $myuser->id }}'">Delete</button>
+
+                            <button class="text-[10px] uppercase hover:line-through" onclick="window.location.href='/user/edit/{{ $myuser->id }}'">Edit</button>
                         </td>
                     </tr>
                     @endforeach

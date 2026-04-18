@@ -17,47 +17,59 @@ class UserController extends Controller
     }
 
    
-    public function create()
-    {
-        //
-    }
-
     
     public function store(Request $request)
     {
-        //
+        Myuser::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => $request->password
+        ]);
+
+        return redirect('/user');
     }
 
-    /**
-     * Display the specified resource.
-     */
+ 
     public function show()
     {
        $myusers =  Myuser::all();
         return view('user', compact('myusers'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
+    
     public function edit(string $id)
     {
-        //
+        $myuser = Myuser::find($id);
+        return view('edit_user', compact('myuser'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+   
     public function update(Request $request, string $id)
     {
-        //
+        $myuser = Myuser::find($id);
+
+        $myuser->update([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => $request->password
+        ]);
+
+        return redirect('/user');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    
     public function destroy(string $id)
     {
-        //
+        Myuser::destroy($id);
+        return redirect('/user');
     }
+     public function reset(Request $request)
+    {
+       $reset =  Myuser::where('email', $request->email)->first();
+        $reset->update([
+            'password' => $request->password
+        ]);
+        return redirect('/user');
+    }
+    
 }

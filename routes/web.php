@@ -23,5 +23,12 @@ Route::post('/simplecontroller_destroy', [SimpleController::class, 'destroy']);
 
 
 
-Route::get('/user1', [UserController::class, 'show']);
-Route::get('/user', [UserController::class, 'index']);
+Route::get('/user', [UserController::class, 'show']);
+Route::get('/api/user/', [UserController::class, 'index']);
+Route::post('/api/user/', [UserController::class, 'store']);
+Route::view('/user/create', 'create_user');
+Route::get('/user/edit/{id}', [UserController::class, 'edit']);
+Route::post('/user/update/{id}', [UserController::class, 'update']);
+Route::post('/user/destroy', [UserController::class, 'destroy']);
+Route::get('/user/destroy/{id}', [UserController::class, 'destroy']);
+Route::post('/user/reset', [UserController::class, 'reset']);
