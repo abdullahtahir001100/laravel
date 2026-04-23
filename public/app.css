@@ -1,0 +1,83 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+}
+/* ===== Base (Firefox) ===== */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.55) transparent;
+}
+
+/* ===== WebKit (Chrome, Edge, Safari) ===== */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+/* Track (hidden by default) */
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Thumb (hidden by default) */
+::-webkit-scrollbar-thumb {
+  background: rgba(56, 189, 248, 0.25);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+/* ===== SHOW ON HOVER ===== */
+body:hover::-webkit-scrollbar-thumb,
+body:active::-webkit-scrollbar-thumb {
+  background: #38bdf8; /* sky blue */
+}
+
+body:hover::-webkit-scrollbar-track,
+body:active::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.04);
+}
+
+/* ===== SHOW WHEN SCROLLING ===== */
+body.scrolling::-webkit-scrollbar-thumb {
+  background: #38bdf8;
+}
+
+body.scrolling::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.04);
+}
+
+/* Keep scrollbars visible inside custom scroll containers like the feed */
+.no-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(19, 73, 96, 0) transparent;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.no-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(56, 189, 248, 0.25);
+  border-radius: 0px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.no-scrollbar:hover::-webkit-scrollbar-thumb,
+.no-scrollbar:active::-webkit-scrollbar-thumb {
+  background: #38bff800;
+}
+
+.no-scrollbar:hover::-webkit-scrollbar-track,
+.no-scrollbar:active::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.04);
+}

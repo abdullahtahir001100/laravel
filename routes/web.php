@@ -1,54 +1,43 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\SimpleController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\AuthController;
 
-Route::view('/', 'add_product');
+/*
+|--------------------------------------------------------------------------
+| Guest Routes (Only for users NOT logged in)
+|--------------------------------------------------------------------------
+*/
+Route::middleware('guest')->group(function () {
+    // Show Login/Register/Forgot Page
+    Route::get('/', [AuthController::class, 'showAuth'])->name('login');
+    
+    // Process Login & Register
+    Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+    Route::post('/register', [AuthController::class, 'register'])->name('register.post');
+});
 
-Route::post('/save-product', [ProductController::class, 'store']);
+/*
+|--------------------------------------------------------------------------
+| Auth Routes (Only for users WHO ARE logged in)
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth')->group(function () {
+    
+    // Main Dashboard/Feed
+    Route::get('/facebook', function () {
+        return view('mainpage');
+    })->name('dashboard');
 
-Route::post('/simplecontroller_make', [SimpleController::class, 'create']);
+    // User Directory
+    Route::get('/users', function () {
+        return view('user');
+    })->name('users.index');
+    Route::view('/Posts', 'posts')->name('posts.index');
+   Route::view('/reels', 'reels')->name('reels.index');
+   Route::view('/notifications', 'notifications')->name('notifications.index');
+   Route::view('/create', 'create')->name('create.index');
 
-Route::get('/simple', [SimpleController::class, 'index']);
-
-Route::get('/simplecontroller_edit/{id}', [SimpleController::class, 'edit']);
-
-Route::post('/simplecontroller_update/{id}', [SimpleController::class, 'update']);
-
-Route::post('/simplecontroller_destroy', [SimpleController::class, 'destroy']);
-
-
-
-
-
-
-Route::get('/user', [UserController::class, 'show']);
-Route::get('/api/user/', [UserController::class, 'index']);
-Route::post('/api/user/', [UserController::class, 'store']);
-Route::view('/user/create', 'create_user');
-Route::get('/user/edit/{id}', [UserController::class, 'edit']);
-Route::post('/user/update/{id}', [UserController::class, 'update']);
-Route::post('/user/destroy', [UserController::class, 'destroy']);
-Route::get('/user/destroy/{id}', [UserController::class, 'destroy']);
-Route::post('/user/reset', [UserController::class, 'reset']);
-Route::post('/user/login', [UserController::class, 'login']);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Route::view('/facebook','facebook_login');
-Route::view('/facebook_page','mainpage');
+    // Logout Action
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+});
