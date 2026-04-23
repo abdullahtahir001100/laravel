@@ -32,3 +32,23 @@ Route::post('/user/update/{id}', [UserController::class, 'update']);
 Route::post('/user/destroy', [UserController::class, 'destroy']);
 Route::get('/user/destroy/{id}', [UserController::class, 'destroy']);
 Route::post('/user/reset', [UserController::class, 'reset']);
+Route::post('/user/login', [UserController::class, 'login']);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Route::view('/facebook','facebook_login');
+Route::view('/facebook_page','mainpage');

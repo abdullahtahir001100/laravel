@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Myuser;
+use App\Models\product;
 
 class UserController extends Controller
 {
@@ -13,7 +14,12 @@ class UserController extends Controller
     public function index()
     {
         $myusers = Myuser::all();
-        return $myusers;
+        $mmyproduct = product::all();
+        return [
+            'Myuser' => $myusers,
+            'product' => $mmyproduct
+        ];
+
     }
 
    
@@ -71,5 +77,15 @@ class UserController extends Controller
         ]);
         return redirect('/user');
     }
-    
+    public function login(Request $request)
+    {
+        $login = Myuser::where('email', $request->email)->first();
+        if ($login && $login->password === $request->password) {
+            
+            return redirect('/user');
+        } else {
+            // Authentication failed
+            return redirect('/login')->withErrors(['Invalid credentials']);
+        }
+    }
 }

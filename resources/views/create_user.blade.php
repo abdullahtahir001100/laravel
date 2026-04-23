@@ -50,14 +50,15 @@
         <div class="p-8">
             <div id="form-login" class="form-content active">
                 <h2 class="text-2xl font-light uppercase tracking-tighter mb-8">System Login</h2>
-                <form class="space-y-6">
-                    <div>
-                        <label class="block text-[9px] uppercase tracking-widest text-zinc-500 mb-2">Email Identity</label>
-                        <input type="email" class="w-full p-4 text-xs" placeholder="ADMIN@SYSTEM.COM">
+                <form class="space-y-6" action="/user/login" method="POST">
+                     @csrf
+                     <div>
+                        <label class="block text-[9px] uppercase tracking-widest text-zinc-500 mb-2">Email Address</label>
+                        <input type="email" name="email" class="w-full p-4 text-xs" placeholder="EMAIL@DOMAIN.COM">
                     </div>
                     <div>
                         <label class="block text-[9px] uppercase tracking-widest text-zinc-500 mb-2">Access Key</label>
-                        <input type="password" class="w-full p-4 text-xs" placeholder="••••••••">
+                        <input type="password" name="password" class="w-full p-4 text-xs" placeholder="••••••••">
                     </div>
                     <button type="submit" class="auth-action w-full bg-white text-black py-4 text-[10px] uppercase font-bold tracking-[0.4em] mt-4">
                         Authorize
