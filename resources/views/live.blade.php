@@ -10,6 +10,8 @@
         body { background-color: #0a0a0a; color: #ffffff; font-family: 'Inter', sans-serif; overflow: hidden; }
         
         .main-grid { display: grid; grid-template-columns: 1fr 380px; height: calc(100vh);  }
+        .chat-toggle-btn { display: none; }
+        .comment-action-mobile { display: none; }
 
         /* Vertical Scroll Snapping */
         .feed-container { 
@@ -61,17 +63,74 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+                height: calc(100vh - 4rem);
+            }
+
+            .chat-toggle-btn {
+                display: flex;
+            }
+
+            .comment-action-mobile {
+                display: flex;
+            }
+
+            #live-chat-panel {
+                position: fixed;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                height: 58vh;
+                transform: translateY(102%);
+                transition: transform 0.28s ease;
+                z-index: 70;
+            }
+
+            #live-chat-panel.mobile-open {
+                transform: translateY(0);
+            }
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 6, 23, 0.55);
+            align-items: center;
+            justify-content: center;
+            z-index: 80;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            width: 100%;
+            max-width: 22rem;
+            border-radius: 0.75rem;
+            background: #ffffff;
+            color: #0f172a;
+            box-shadow: 0 20px 30px rgba(15, 23, 42, 0.22);
+        }
     </style>
 </head>
-<body class="flex overflow-hidden">
+<body class="overflow-hidden">
 
- 
+  
 
-    <div class="flex-1 flex flex-col h-screen">
+    <div class="flex  h-screen overflow-hidden">
+     
+
+    <div class="flex-1 flex flex-col h-full overflow-hidden">
        
         <div class="main-grid">
             
             <section class="feed-container" id="video-feed">
+                <button onclick="toggleLiveChat()" class="chat-toggle-btn absolute z-30 top-4 right-4 bg-white text-slate-900 px-3 py-2 rounded-[5px] text-xs font-bold items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+                    Chat
+                </button>
                 
                 <div class="stream-item group" data-stream-id="stream-1">
                     <video autoplay loop muted playsinline class="absolute w-full h-full object-cover z-0 opacity-90">
@@ -99,6 +158,13 @@
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
                             </div>
                             <span class="text-[11px] font-bold drop-shadow-md">850</span>
+                        </div>
+
+                        <div class="comment-action-mobile flex-col items-center gap-1 group/btn cursor-pointer" onclick="openLiveChatFromAction(this)">
+                            <div class="w-12 h-12 glass-flat rounded-full flex items-center justify-center hover:bg-white hover:text-black transition-colors shadow-lg">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+                            </div>
+                            <span class="comment-count text-[11px] font-bold drop-shadow-md" data-stream-id="stream-1">0</span>
                         </div>
                     </div>
 
@@ -145,6 +211,13 @@
                             </div>
                             <span class="text-[11px] font-bold drop-shadow-md">320</span>
                         </div>
+
+                        <div class="comment-action-mobile flex-col items-center gap-1 group/btn cursor-pointer" onclick="openLiveChatFromAction(this)">
+                            <div class="w-12 h-12 glass-flat rounded-full flex items-center justify-center hover:bg-white hover:text-black transition-colors shadow-lg">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+                            </div>
+                            <span class="comment-count text-[11px] font-bold drop-shadow-md" data-stream-id="stream-2">0</span>
+                        </div>
                     </div>
 
                     <div class="absolute bottom-0 left-0 w-full p-8 bg-gradient-to-t from-black via-black/80 to-transparent z-10">
@@ -165,14 +238,17 @@
 
             </section>
 
-            <aside class="bg-[#121212] border-l border-zinc-800 flex flex-col shadow-[-5px_0_15px_rgba(0,0,0,0.5)] z-30">
+            <aside id="live-chat-panel" class="bg-[#121212] border-l border-zinc-800 flex flex-col shadow-[-5px_0_15px_rgba(0,0,0,0.5)] z-30">
                 
                 <div class="p-4 border-b border-zinc-800 bg-[#18181b] flex justify-between items-center shadow-sm">
                     <h3 class="text-sm font-bold text-zinc-100 flex items-center gap-2">
                         <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
                         Live Chat
                     </h3>
-                    <span id="active-stream-label" class="text-[10px] uppercase tracking-widest text-zinc-400 font-bold">stream-1</span>
+                    <div class="flex items-center gap-2">
+                        <span id="active-stream-label" class="text-[10px] uppercase tracking-widest text-zinc-400 font-bold">stream-1</span>
+                        <button onclick="closeLiveChat()" class="lg:hidden text-zinc-400 hover:text-white">✕</button>
+                    </div>
                 </div>
 
                 <div id="chat-feed" class="flex-1 overflow-y-auto chat-scroll p-4 space-y-4 bg-[#0f0f13]">
@@ -189,6 +265,27 @@
             </aside>
         </div>
     </div>
+    </div>
+
+<div id="live-chat-backdrop" class="fixed inset-0 bg-black/50 z-60 hidden lg:hidden" onclick="closeLiveChat()"></div>
+
+<div id="share-modal" class="modal-overlay" onclick="if (event.target === this) closeShareModal()">
+    <div class="modal-content p-6">
+        <div class="flex justify-between mb-5">
+            <h4 class="font-bold text-lg">Share Live</h4>
+            <button onclick="closeShareModal()" class="text-slate-400 hover:text-slate-800" aria-label="Close share modal">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2"></path></svg>
+            </button>
+        </div>
+        <div class="grid grid-cols-4 gap-4 mb-6 text-center">
+            <button class="flex flex-col items-center gap-2" onclick="sharePlatform('whatsapp')"><div class="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center font-bold text-xl">W</div><span class="text-[10px] font-bold">WhatsApp</span></button>
+            <button class="flex flex-col items-center gap-2" onclick="sharePlatform('facebook')"><div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-xl">F</div><span class="text-[10px] font-bold">Facebook</span></button>
+            <button class="flex flex-col items-center gap-2" onclick="sharePlatform('twitter')"><div class="w-12 h-12 bg-sky-100 text-sky-600 rounded-full flex items-center justify-center font-bold text-xl">T</div><span class="text-[10px] font-bold">Twitter</span></button>
+            <button class="flex flex-col items-center gap-2" onclick="copyShareLink()"><div class="w-12 h-12 bg-slate-100 text-slate-600 rounded-full flex items-center justify-center font-bold"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg></div><span class="text-[10px] font-bold">Copy</span></button>
+        </div>
+        <p id="share-feedback" class="text-xs text-slate-500 text-center"></p>
+    </div>
+</div>
 
 <script>
     // --- CHAT LOGIC (PER STREAM) ---
@@ -211,6 +308,89 @@
         ]
     };
     let activeStreamId = 'stream-1';
+
+    function toggleLiveChat() {
+        const panel = document.getElementById('live-chat-panel');
+        const backdrop = document.getElementById('live-chat-backdrop');
+        if (!panel) return;
+        panel.classList.toggle('mobile-open');
+        backdrop?.classList.toggle('hidden', !panel.classList.contains('mobile-open'));
+    }
+
+    function closeLiveChat() {
+        const panel = document.getElementById('live-chat-panel');
+        const backdrop = document.getElementById('live-chat-backdrop');
+        panel?.classList.remove('mobile-open');
+        backdrop?.classList.add('hidden');
+    }
+
+    function toggleShare() {
+        const modal = document.getElementById('share-modal');
+        if (!modal) return;
+        modal.style.display = 'flex';
+        const content = modal.querySelector('.modal-content');
+        if (content) {
+            gsap.fromTo(content, { y: 80, opacity: 0 }, { y: 0, opacity: 1, duration: 0.32, ease: 'power3.out' });
+        }
+    }
+
+    function closeShareModal() {
+        const modal = document.getElementById('share-modal');
+        if (!modal) return;
+        const content = modal.querySelector('.modal-content');
+        if (!content) {
+            modal.style.display = 'none';
+            return;
+        }
+        gsap.to(content, {
+            y: 80,
+            opacity: 0,
+            duration: 0.2,
+            onComplete: () => {
+                modal.style.display = 'none';
+                const feedback = document.getElementById('share-feedback');
+                if (feedback) feedback.textContent = '';
+            }
+        });
+    }
+
+    function sharePlatform(platform) {
+        const feedback = document.getElementById('share-feedback');
+        if (feedback) feedback.textContent = 'Preparing ' + platform + ' share...';
+        setTimeout(() => closeShareModal(), 320);
+    }
+
+    function copyShareLink() {
+        const streamPath = '/live?stream=' + encodeURIComponent(activeStreamId);
+        const shareUrl = window.location.origin + streamPath;
+        const feedback = document.getElementById('share-feedback');
+
+        navigator.clipboard.writeText(shareUrl).then(() => {
+            if (feedback) feedback.textContent = 'Link copied';
+            setTimeout(() => closeShareModal(), 450);
+        }).catch(() => {
+            if (feedback) feedback.textContent = 'Could not copy link';
+        });
+    }
+
+    function openLiveChatFromAction(trigger) {
+        const streamItem = trigger?.closest('.stream-item[data-stream-id]');
+        const streamId = streamItem?.dataset?.streamId;
+        if (streamId) setActiveStream(streamId);
+
+        const panel = document.getElementById('live-chat-panel');
+        const backdrop = document.getElementById('live-chat-backdrop');
+        panel?.classList.add('mobile-open');
+        backdrop?.classList.remove('hidden');
+    }
+
+    function updateCommentCounters() {
+        document.querySelectorAll('.comment-count[data-stream-id]').forEach((el) => {
+            const streamId = el.dataset.streamId;
+            const count = (streamComments[streamId] || []).length;
+            el.textContent = String(count);
+        });
+    }
 
     function getUserColor(userName, isMe) {
         if (isMe) return 'bg-red-500';
@@ -243,6 +423,7 @@
         const comments = streamComments[activeStreamId] || [];
         feed.innerHTML = comments.map((c) => makeCommentHtml(c.user, c.text, c.isMe)).join('');
         if (label) label.textContent = activeStreamId;
+        updateCommentCounters();
         feed.scrollTo({ top: feed.scrollHeight, behavior: 'smooth' });
     }
 
@@ -260,6 +441,8 @@
                 feed.scrollTo({ top: feed.scrollHeight, behavior: 'smooth' });
             }, 50);
         }
+
+        updateCommentCounters();
 
         document.getElementById('chat-input').value = '';
     }
@@ -334,7 +517,9 @@
     // Initial Comments
     window.onload = () => {
         renderActiveStreamChat();
+        updateCommentCounters();
     };
 </script>
+<script src="{{ asset('app.js') }}"></script>
 </body>
 </html>

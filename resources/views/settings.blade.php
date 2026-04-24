@@ -116,7 +116,13 @@
 	</style>
 </head>
 
-<body class="min-h-screen">
+<body class="min-h-screen overflow-hidden">
+	<x-dashboard-header />
+
+	<div class="flex pt-16 h-screen overflow-hidden">
+		<x-dashboard-sidebar />
+
+	<div class="flex-1 overflow-y-auto">
 	<div class="max-w-[1700px] mx-auto px-4 md:px-8 py-6 md:py-8">
 		<header class="panel p-4 md:p-5 mb-6">
 			<div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -171,6 +177,8 @@
 			</main>
 		</div>
 	</div>
+	</div>
+	</div>
 
 	<div id="toast" class="fixed right-4 bottom-4 z-50 hidden px-4 py-2.5 text-sm font-semibold text-white radius-5"></div>
 
@@ -197,6 +205,17 @@
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 	<script>
+		const SECTION_ICONS = {
+			profile: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>',
+			about: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01"></path></svg>',
+			privacy: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 11c0-1.657 1.343-3 3-3h1V6a4 4 0 00-8 0v2h1c1.657 0 3 1.343 3 3z"></path><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5 11h14v10H5z"></path></svg>',
+			security: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 3l7 4v5c0 5-3.5 8.5-7 9-3.5-.5-7-4-7-9V7l7-4z"></path></svg>',
+			account: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317a1.724 1.724 0 013.35 0 1.724 1.724 0 002.573 1.066 1.724 1.724 0 012.37 2.37 1.724 1.724 0 001.065 2.572 1.724 1.724 0 010 3.35 1.724 1.724 0 00-1.066 2.573 1.724 1.724 0 01-2.37 2.37 1.724 1.724 0 00-2.572 1.065 1.724 1.724 0 01-3.35 0 1.724 1.724 0 00-2.573-1.066 1.724 1.724 0 01-2.37-2.37 1.724 1.724 0 00-1.065-2.572 1.724 1.724 0 010-3.35 1.724 1.724 0 001.066-2.573 1.724 1.724 0 012.37-2.37 1.724 1.724 0 002.572-1.065z"></path></svg>',
+			notifications: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1"></path></svg>',
+			activity: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 12h4l3 8 4-16 3 8h4"></path></svg>',
+			data: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h16M4 17h10"></path></svg>'
+		};
+
 		const SETTINGS_SCHEMA = [
 			{
 				id: 'profile',
@@ -516,9 +535,9 @@
 			visibleSections.forEach((section) => {
 				const btn = document.createElement('button');
 				btn.type = 'button';
-				btn.className = 'left-nav-item text-left px-3 py-2.5 border border-slate-200 radius-5 text-sm';
+				btn.className = 'left-nav-item text-left px-3 py-2.5 border border-slate-200 radius-5 text-sm flex items-center gap-2';
 				btn.dataset.section = section.id;
-				btn.textContent = section.title;
+				btn.innerHTML = (SECTION_ICONS[section.id] || '') + '<span>' + section.title + '</span>';
 				btn.addEventListener('click', () => activateSection(section.id));
 				refs.leftNav.appendChild(btn);
 
@@ -844,6 +863,7 @@
 		gsap.fromTo('header.panel', { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.38, ease: 'power2.out' });
 		gsap.fromTo('.panel', { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.3, stagger: 0.05, ease: 'power2.out' });
 	</script>
+	<script src="{{ asset('app.js') }}"></script>
 </body>
 
 </html>
