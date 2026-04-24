@@ -70,7 +70,8 @@
     // Sample Videos Array (W3C standard test videos)
     $videos = [
         "https://www.w3schools.com/html/mov_bbb.mp4",
-        "https://media.w3.org/2010/05/sintel/trailer.mp4"
+        "https://media.w3.org/2010/05/sintel/trailer.mp4",
+        
     ];
     for($i=1; $i<=5; $i++): 
         $vid_src = $videos[$i % 2]; // Alternate between the 2 videos

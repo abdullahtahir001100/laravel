@@ -37,6 +37,11 @@ Route::middleware('auth')->group(function () {
    Route::view('/reels', 'reels')->name('reels.index');
    Route::view('/notifications', 'notifications')->name('notifications.index');
    Route::view('/create', 'create')->name('create.index');
+   Route::view('/profile', 'profile')->name('profile.index');
+   Route::view('/friends', 'friends')->name('friends.index');
+   Route::view('/discover', 'live')->name('live.index');
+   Route::view('/settings', 'settings')->name('settings.index');
+   Route::view('/messages', 'messages')->name('messages.index');
 
     // Logout Action
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

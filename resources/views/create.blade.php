@@ -6,6 +6,7 @@
     <title>Studio | Create Content</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link href="{{ asset('app.css') }}" rel='stylesheet'>
     <style>
         * { border-radius: 0 !important; box-shadow: none !important; }
         body { background-color: #fff; color: #111; font-family: 'Inter', sans-serif; }
