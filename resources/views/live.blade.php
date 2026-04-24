@@ -73,7 +73,7 @@
             
             <section class="feed-container" id="video-feed">
                 
-                <div class="stream-item group">
+                <div class="stream-item group" data-stream-id="stream-1">
                     <video autoplay loop muted playsinline class="absolute w-full h-full object-cover z-0 opacity-90">
                         <source src="{{ asset('v1.mp4') }}" type="video/mp4">
                     </video>
@@ -118,7 +118,7 @@
                     </div>
                 </div>
 
-                <div class="stream-item group">
+                <div class="stream-item group" data-stream-id="stream-2">
                     <video autoplay loop muted playsinline class="absolute w-full h-full object-cover z-0 opacity-90">
                         <source src="{{ asset('v1.mp4') }}" type="video/mp4">
                     </video>
@@ -172,6 +172,7 @@
                         <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
                         Live Chat
                     </h3>
+                    <span id="active-stream-label" class="text-[10px] uppercase tracking-widest text-zinc-400 font-bold">stream-1</span>
                 </div>
 
                 <div id="chat-feed" class="flex-1 overflow-y-auto chat-scroll p-4 space-y-4 bg-[#0f0f13]">
@@ -190,7 +191,7 @@
     </div>
 
 <script>
-    // --- CHAT LOGIC (CLEAN UI UPDATE) ---
+    // --- CHAT LOGIC (PER STREAM) ---
     const users = [
         { name: "Ali_CS", color: "bg-blue-500" },
         { name: "Zain_99", color: "bg-emerald-500" },
@@ -199,48 +200,95 @@
         { name: "Eman_Art", color: "bg-pink-500" }
     ];
     const msgs = ["Bro design is smooth 🚀", "Zabardast kaam hai!", "Stream quality is OP", "Scrollbar is working perfectly", "Nice rounded corners 👌", "Full support!"];
+    const streamComments = {
+        'stream-1': [
+            { user: 'Ali_CS', text: 'Hello guys!', isMe: false },
+            { user: 'Sarah_Design', text: 'Waiting for the stream to start properly.', isMe: false }
+        ],
+        'stream-2': [
+            { user: 'King_Dev', text: 'Second stream energy is high 🔥', isMe: false },
+            { user: 'Eman_Art', text: 'Camera angle is clean here.', isMe: false }
+        ]
+    };
+    let activeStreamId = 'stream-1';
 
-    function addComment(userName, text, isMe = false) {
-        if(!text) return;
-        
-        const feed = document.getElementById('chat-feed');
-        const div = document.createElement('div');
-        div.className = "comment-enter flex flex-col";
-        
-        let userColor = isMe ? "bg-red-500" : users.find(u => u.name === userName)?.color || "bg-zinc-600";
+    function getUserColor(userName, isMe) {
+        if (isMe) return 'bg-red-500';
+        return users.find(u => u.name === userName)?.color || 'bg-zinc-600';
+    }
 
-        // Clean Comment Layout
-        div.innerHTML = `
-            <div class="flex items-start gap-2.5 group">
-                <div class="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] font-bold text-white shadow-sm ${userColor}">
-                    ${userName[0]}
-                </div>
-                <div class="flex-1 pb-1 border-b border-zinc-800/50 group-hover:border-zinc-700 transition-colors">
-                    <div class="flex items-center gap-2">
-                        <span class="text-[12px] font-bold text-zinc-300">${userName}</span>
-                        <span class="text-[9px] text-zinc-600 font-medium">Just now</span>
+    function makeCommentHtml(userName, text, isMe = false) {
+        const userColor = getUserColor(userName, isMe);
+        return `
+            <div class="comment-enter flex flex-col">
+                <div class="flex items-start gap-2.5 group">
+                    <div class="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] font-bold text-white shadow-sm ${userColor}">
+                        ${userName[0]}
                     </div>
-                    <p class="text-[13px] text-zinc-100 mt-0.5 leading-snug break-words">${text}</p>
+                    <div class="flex-1 pb-1 border-b border-zinc-800/50 group-hover:border-zinc-700 transition-colors">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[12px] font-bold text-zinc-300">${userName}</span>
+                            <span class="text-[9px] text-zinc-600 font-medium">Just now</span>
+                        </div>
+                        <p class="text-[13px] text-zinc-100 mt-0.5 leading-snug break-words">${text}</p>
+                    </div>
                 </div>
             </div>
         `;
-        
-        feed.appendChild(div);
-        
-        // Auto scroll to bottom
-        setTimeout(() => {
-            feed.scrollTo({ top: feed.scrollHeight, behavior: 'smooth' });
-        }, 50);
+    }
 
-        document.getElementById('chat-input').value = "";
+    function renderActiveStreamChat() {
+        const feed = document.getElementById('chat-feed');
+        const label = document.getElementById('active-stream-label');
+        const comments = streamComments[activeStreamId] || [];
+        feed.innerHTML = comments.map((c) => makeCommentHtml(c.user, c.text, c.isMe)).join('');
+        if (label) label.textContent = activeStreamId;
+        feed.scrollTo({ top: feed.scrollHeight, behavior: 'smooth' });
+    }
+
+    function addCommentToStream(streamId, userName, text, isMe = false) {
+        if (!text) return;
+        if (!streamComments[streamId]) streamComments[streamId] = [];
+
+        const comment = { user: userName, text: text, isMe: isMe };
+        streamComments[streamId].push(comment);
+
+        if (streamId === activeStreamId) {
+            const feed = document.getElementById('chat-feed');
+            feed.insertAdjacentHTML('beforeend', makeCommentHtml(userName, text, isMe));
+            setTimeout(() => {
+                feed.scrollTo({ top: feed.scrollHeight, behavior: 'smooth' });
+            }, 50);
+        }
+
+        document.getElementById('chat-input').value = '';
+    }
+
+    function setActiveStream(streamId) {
+        if (!streamId || streamId === activeStreamId) return;
+        activeStreamId = streamId;
+        renderActiveStreamChat();
     }
 
     // Auto Chat Generation
     let chatInterval = setInterval(() => {
         const randomUser = users[Math.floor(Math.random() * users.length)].name;
         const randomMsg = msgs[Math.floor(Math.random() * msgs.length)];
-        addComment(randomUser, randomMsg);
+        addCommentToStream(activeStreamId, randomUser, randomMsg);
     }, 2500);
+
+    const streamObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                setActiveStream(entry.target.dataset.streamId);
+            }
+        });
+    }, {
+        root: document.getElementById('video-feed'),
+        threshold: 0.6
+    });
+
+    document.querySelectorAll('.stream-item[data-stream-id]').forEach((item) => streamObserver.observe(item));
 
 
     // --- INTERACTIONS ---
@@ -273,19 +321,19 @@
             onComplete: () => icon.remove()
         });
 
-        // Add System alert to chat
-        addComment("System", "❤️ Loved the stream!", true);
+        // Add System alert to active stream chat
+        const streamId = container.dataset.streamId || activeStreamId;
+        addCommentToStream(streamId, "System", "❤️ Loved the stream!", true);
     }
 
     // Enter Key Support
     document.getElementById('chat-input').addEventListener('keypress', (e) => {
-        if(e.key === 'Enter') addComment('You', e.target.value, true);
+        if(e.key === 'Enter') addCommentToStream(activeStreamId, 'You', e.target.value, true);
     });
 
     // Initial Comments
     window.onload = () => {
-        addComment("Ali_CS", "Hello guys!");
-        addComment("Sarah_Design", "Waiting for the stream to start properly.");
+        renderActiveStreamChat();
     };
 </script>
 </body>

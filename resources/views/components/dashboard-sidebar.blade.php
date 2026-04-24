@@ -36,6 +36,9 @@
     id="sidebar"
     class="fixed lg:sticky top-16 left-0 h-[calc(100vh-4rem)] lg:h-[calc(100vh-4rem)] w-72 lg:w-64 border-r border-slate-200 bg-white z-30 -translate-x-full lg:translate-x-0 transition-transform shadow-none self-start"
 >
+    @php
+        $isRoute = fn (...$names) => request()->routeIs(...$names);
+    @endphp
     <div class="h-full flex flex-col justify-between py-5">
         <div class="px-4 overflow-y-auto">
             <div class="mb-5 px-1">
@@ -50,7 +53,7 @@
             </div>
 
             <div class="space-y-1">
-                <a href="/" class="nav-link active rounded-custom">
+                <a href="{{ route('dashboard') }}" class="nav-link rounded-custom {{ $isRoute('dashboard') ? 'active' : '' }}">
                     <svg
                         fill="none"
                         stroke="currentColor"
@@ -64,7 +67,7 @@
                     <span class="flex-1">Home Feed</span>
                 </a>
 
-                <a href="/Posts" class="nav-link rounded-custom">
+                <a href="{{ route('posts.index') }}" class="nav-link rounded-custom {{ $isRoute('posts.index') ? 'active' : '' }}">
                     <svg
                         fill="none"
                         stroke="currentColor"
@@ -80,7 +83,7 @@
                     <span class="flex-1">Posts</span>
                 </a>
 
-                <a href="/discover" class="nav-link rounded-custom">
+                <a href="{{ route('live.index') }}" class="nav-link rounded-custom {{ $isRoute('live.index') ? 'active' : '' }}">
                     <svg
                         fill="none"
                         stroke="currentColor"
@@ -98,7 +101,7 @@
                     >
                 </a>
 
-                <a href="/reels" class="nav-link rounded-custom">
+                <a href="{{ route('reels.index') }}" class="nav-link rounded-custom {{ $isRoute('reels.index') ? 'active' : '' }}">
                     <svg
                         fill="none"
                         stroke="currentColor"
@@ -111,8 +114,14 @@
                     </svg>
                     <span class="flex-1">Reels</span>
                 </a>
+                <a href="{{ route('friends.index') }}" class="nav-link rounded-none shadow-none flex items-center gap-3 px-2 py-2 {{ $isRoute('friends.index') ? 'active' : '' }}">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+    </svg>
+    <span class="flex-1">Friends</span>
+</a>
 
-                <a href="/messages" class="nav-link rounded-custom">
+                <a href="{{ route('messages.index') }}" class="nav-link rounded-custom {{ $isRoute('messages.index') ? 'active' : '' }}">
                     <svg
                         fill="none"
                         stroke="currentColor"
@@ -126,7 +135,7 @@
                     <span class="flex-1">Messages</span>
                 </a>
 
-                <a href="/notifications" class="nav-link rounded-custom">
+                <a href="{{ route('notifications.index') }}" class="nav-link rounded-custom {{ $isRoute('notifications.index') ? 'active' : '' }}">
                     <svg
                         fill="none"
                         stroke="currentColor"
@@ -141,8 +150,8 @@
                 </a>
 
                 <a
-                    href="/create"
-                    class="nav-link rounded-custom text-blue-600 font-bold bg-blue-50/50"
+                    href="{{ route('create.index') }}"
+                    class="nav-link rounded-custom {{ $isRoute('create.index') ? 'text-blue-600 font-bold bg-blue-50/50 active' : '' }}"
                 >
                     <svg
                         fill="none"
@@ -300,8 +309,8 @@
             </a>
 
             <a
-                href="/settings"
-                class="mt-3 nav-link rounded-custom justify-between"
+                href="{{ route('settings.index') }}"
+                class="mt-3 nav-link rounded-custom justify-between {{ $isRoute('settings.index') ? 'active' : '' }}"
             >
                 <span class="flex items-center gap-3 min-w-0">
                     <svg

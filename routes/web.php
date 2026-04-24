@@ -42,6 +42,7 @@ Route::middleware('auth')->group(function () {
    Route::view('/discover', 'live')->name('live.index');
    Route::view('/settings', 'settings')->name('settings.index');
    Route::view('/messages', 'messages')->name('messages.index');
+   Route::view('/user/{id}', 'user-profile')->name('user.profile');
 
     // Logout Action
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

@@ -208,6 +208,7 @@
         // Initialize on load
         window.onload = () => renderFeed('all');
     </script>
+  <script src="{{ asset('app.js') }}"></script>
 
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Directory | SocialApp</title>
+    <title>Friends</title>
     <script src="https://cdn.tailwindcss.com"></script>
   <link href="{{ asset('app.css') }}" rel='stylesheet'>
     
@@ -33,8 +33,8 @@
         <div class="max-w-6xl mx-auto mb-8">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                    <h1 class="text-2xl font-bold text-slate-900">User Directory</h1>
-                    <p class="text-slate-500 text-sm">Manage and connect with your community</p>
+                    <h1 class="text-2xl font-bold text-slate-900">Friends</h1>
+                    <p class="text-slate-500 text-sm">Manage and connect with your friends</p>
                 </div>
 
                 <div class="flex flex-wrap items-center gap-3">
@@ -50,7 +50,7 @@
                         </button>
                     </div>
 
-                    <input type="text" id="userSearch" placeholder="Search users..." 
+                    <input type="text" id="userSearch" placeholder="Search Friends..." 
                         class="pl-4 pr-3 py-2 border border-slate-200 rounded-custom focus:ring-1 focus:ring-blue-500 outline-none text-sm bg-white w-64">
                 </div>
             </div>
@@ -125,7 +125,7 @@
                     </div>
                     <div class="flex items-center gap-6">
                         <span class="hidden md:block text-xs text-slate-400 italic">Added 2 days ago</span>
-                        <button class="bg-slate-900 text-white px-4 py-1.5 rounded-custom text-xs font-medium hover:bg-blue-600 transition-colors">Follow</button>
+                        <button class="bg-slate-900 text-white px-4 py-1.5 rounded-custom text-xs font-medium hover:bg-blue-600 transition-colors">Un Follow</button>
                     </div>
                 </div>
                 <?php endforeach; ?>

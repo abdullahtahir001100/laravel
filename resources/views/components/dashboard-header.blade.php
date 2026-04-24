@@ -49,7 +49,7 @@
         <p class="text-xs text-slate-500">itssheriofficial@mail.com</p>
       </div>
 
-      <button
+      <button onclick="window.location.href='{{ route('settings.index') }}'"
         class="w-full text-left p-2 text-sm hover:bg-slate-50 rounded-custom flex items-center gap-3 text-slate-700">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-4 h-4">
           <path
@@ -59,7 +59,7 @@
         User Settings
       </button>
 
-      <button
+      <button onclick="window.location.href='{{ route('dashboard') }}'"
         class="w-full text-left p-2 text-sm hover:bg-slate-50 rounded-custom flex items-center gap-3 text-slate-700">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-4 h-4">
           <path d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -69,7 +69,7 @@
 
       <hr class="my-2 border-slate-50">
 
-      <button
+      <button onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
         class="w-full text-left p-2 text-sm text-red-500 hover:bg-red-50 rounded-custom flex items-center gap-3">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-4 h-4">
           <path
@@ -78,6 +78,10 @@
         </svg>
         Logout
       </button>
+
+      <form id="logout-form" method="POST" action="{{ route('logout') }}" class="hidden">
+        @csrf
+      </form>
     </div>
   </div>
 </header>

@@ -252,5 +252,7 @@ main::-webkit-scrollbar {
     // Initial Load
     if(window.innerWidth > 1024) document.getElementById('comment-scroll-area').innerHTML = mockComments(1);
 </script>
+  <script src="{{ asset('app.js') }}"></script>
+
 </body>
 </html>
