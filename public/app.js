@@ -75,42 +75,7 @@
       }
     ];
 
-    const directoryUsers = [{
-        id: 1,
-        name: 'Hina Ashfaq',
-        role: 'UI Designer',
-        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Hina',
-        url: '/users?name=Hina'
-      },
-      {
-        id: 2,
-        name: 'Faraz Ahmed',
-        role: 'Laravel Dev',
-        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Faraz',
-        url: '/users?name=Faraz'
-      },
-      {
-        id: 3,
-        name: 'Noor Fatima',
-        role: 'Content Creator',
-        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Noor',
-        url: '/users?name=Noor'
-      },
-      {
-        id: 4,
-        name: 'Ali Hassan',
-        role: 'Product Manager',
-        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Ali',
-        url: '/users?name=Ali'
-      },
-      {
-        id: 5,
-        name: 'Sara Khan',
-        role: 'Frontend Engineer',
-        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sara',
-        url: '/users?name=Sara'
-      }
-    ];
+    let directoryUsers = [];
 
     function toggleUserMenu() {
       const menu = document.getElementById('user-dropdown');
@@ -179,12 +144,24 @@
       userSearchResults.innerHTML = list.map((user) => (
         `<div class="flex items-center justify-between border border-slate-200 rounded-custom p-2.5">` +
         `<div class="flex items-center gap-3">` +
-        `<img src="${user.avatar}" alt="${user.name}" class="w-10 h-10 rounded-custom bg-slate-100">` +
-        `<div><p class="text-sm font-semibold text-slate-800">${user.name}</p><p class="text-xs text-slate-500">${user.role}</p></div>` +
+        `<img src="${user.avatarUrl || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(user.displayName || 'User'))}" alt="${user.displayName || 'User'}" class="w-10 h-10 rounded-custom bg-slate-100">` +
+        `<div><p class="text-sm font-semibold text-slate-800">${user.displayName || 'User'}</p><p class="text-xs text-slate-500">${user.email || ''}</p></div>` +
         `</div>` +
-        `<a href="${user.url}" class="text-xs font-semibold text-blue-600 hover:text-blue-700">View Profile</a>` +
+        `<a href="${user.profileUrl || '#'}" class="text-xs font-semibold text-blue-600 hover:text-blue-700">View Profile</a>` +
         `</div>`
       )).join('');
+    }
+
+    async function fetchDirectoryUsers(query) {
+      const response = await fetch('/api/users/search?q=' + encodeURIComponent(query || ''), {
+        headers: {
+          Accept: 'application/json'
+        }
+      });
+
+      if (!response.ok) return [];
+      const data = await response.json();
+      return data.users || [];
     }
 
     function togglePostOptions(btn) {
@@ -452,21 +429,20 @@
       headerSearchInput.value = '';
     });
 
-    mainUserSearch?.addEventListener('input', (e) => {
-      const q = (e.target.value || '').trim().toLowerCase();
-      const filtered = !q ?
-        directoryUsers :
-        directoryUsers.filter((u) => (u.name + ' ' + u.role).toLowerCase().includes(q));
-      renderUserSearchResults(filtered, e.target.value || '');
+    mainUserSearch?.addEventListener('input', async (e) => {
+      const query = e.target.value || '';
+      directoryUsers = await fetchDirectoryUsers(query);
+      renderUserSearchResults(directoryUsers, query);
     });
 
-    mainUserSearch?.addEventListener('keydown', (e) => {
+    mainUserSearch?.addEventListener('keydown', async (e) => {
       if (e.key !== 'Enter') return;
-      const q = (e.target.value || '').trim().toLowerCase();
+      const q = (e.target.value || '').trim();
       if (!q) return;
-      const filtered = directoryUsers.filter((u) => (u.name + ' ' + u.role).toLowerCase()
-        .includes(q));
-      if (filtered.length) window.location.href = filtered[0].url;
+      directoryUsers = await fetchDirectoryUsers(q);
+      if (directoryUsers.length && directoryUsers[0].profileUrl) {
+        window.location.href = directoryUsers[0].profileUrl;
+      }
     });
 
     sidebarBackdrop?.addEventListener('click', closeSidebar);

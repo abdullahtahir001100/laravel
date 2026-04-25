@@ -122,14 +122,116 @@
     </div>
 
     <script>
-        const notifications = [
-            { id: 1, type: 'request', user: 'Zain_Malik', text: 'sent you a follow request', time: '2m ago', isUnread: true },
-            { id: 2, type: 'message', user: 'Admin_Support', text: 'replied to your ticket regarding "API Access"', time: '15m ago', isUnread: true },
-            { id: 3, type: 'comment', user: 'Sara_Khan', text: 'commented on your "Sword Collection" post', time: '1h ago', isUnread: false },
-            { id: 4, type: 'report', user: 'System_Bot', text: 'Alert: Login detected from a new device (Windows/Lahore)', time: '3h ago', isUnread: false },
-            { id: 5, type: 'request', user: 'Hamza_Pro', text: 'wants to join your development team', time: 'Yesterday', isUnread: false },
-            { id: 6, type: 'message', user: 'Customer_09', text: 'sent a query about Calligraphy custom orders', time: 'Yesterday', isUnread: false }
-        ];
+        const CSRF_TOKEN = '{{ csrf_token() }}';
+        let notifications = [];
+        let allNotifications = [];
+
+        function mapType(type) {
+            if (type === 'follow_request') return 'request';
+            if (type === 'follow_accepted') return 'request';
+            if (type === 'comment') return 'comment';
+            if (type === 'like') return 'message';
+            if (type === 'not_interested') return 'report';
+            return 'message';
+        }
+
+        function buildText(type) {
+            if (type === 'follow_request') return 'sent you a follow request';
+            if (type === 'follow_accepted') return 'accepted your follow request';
+            if (type === 'like') return 'liked your post';
+            if (type === 'comment') return 'commented on your post';
+            if (type === 'not_interested') return 'marked your post as not interested';
+            return 'sent you an update';
+        }
+
+        async function loadNotifications() {
+            const response = await fetch('/api/notifications', {
+                headers: { Accept: 'application/json' }
+            });
+
+            if (!response.ok) return;
+
+            const data = await response.json();
+            allNotifications = data.notifications || [];
+            notifications = allNotifications.map((item) => ({
+                id: item.id,
+                originalType: item.type,
+                filterType: mapType(item.type),
+                user: item.actorName,
+                text: buildText(item.type),
+                time: item.time || 'Now',
+                isUnread: !item.isRead,
+                followId: item.payload?.follow_id || null,
+                actorId: item.actorId,
+            }));
+
+            renderFeed('all');
+        }
+
+        async function acceptFollowRequest(notifId, followId) {
+            if (!followId) {
+                console.error('No follow ID found');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/follows/${followId}/accept`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': CSRF_TOKEN,
+                    },
+                });
+
+                if (response.ok) {
+                    // Remove the notification item from UI
+                    const notifItem = document.querySelector(`[data-notif-id="${notifId}"]`);
+                    if (notifItem) {
+                        gsap.to(notifItem, {
+                            opacity: 0,
+                            x: -20,
+                            duration: 0.3,
+                            onComplete: () => notifItem.remove(),
+                        });
+                    }
+                    // Reload notifications
+                    loadNotifications();
+                }
+            } catch (err) {
+                console.error('Error accepting follow request:', err);
+            }
+        }
+
+        async function declineFollowRequest(notifId, followId) {
+            if (!followId) {
+                console.error('No follow ID found');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/follows/${followId}/reject`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': CSRF_TOKEN,
+                    },
+                });
+
+                if (response.ok) {
+                    const notifItem = document.querySelector(`[data-notif-id="${notifId}"]`);
+                    if (notifItem) {
+                        gsap.to(notifItem, {
+                            opacity: 0,
+                            x: -20,
+                            duration: 0.3,
+                            onComplete: () => notifItem.remove(),
+                        });
+                    }
+                    loadNotifications();
+                }
+            } catch (err) {
+                console.error('Error declining follow request:', err);
+            }
+        }
 
         function renderFeed(type = 'all') {
             const wrapper = document.getElementById('notifWrapper');
@@ -139,7 +241,7 @@
             
             wrapper.innerHTML = '';
 
-            const filtered = type === 'all' ? notifications : notifications.filter(n => n.type === type);
+            const filtered = type === 'all' ? notifications : notifications.filter(n => n.filterType === type);
 
             if (filtered.length === 0) {
                 wrapper.innerHTML = `<div class="p-20 text-center text-slate-300 font-bold uppercase text-xs tracking-widest">No ${type} notifications found.</div>`;
@@ -147,25 +249,26 @@
             }
 
             filtered.forEach(n => {
+                const isFollowRequest = n.originalType === 'follow_request';
                 const row = `
                     <div class="notif-item p-4 md:p-6 flex flex-wrap md:flex-nowrap items-center justify-between group" 
-                         style="opacity: 0; transform: translateX(-20px);" data-type="${n.type}">
+                         style="opacity: 0; transform: translateX(-20px);" data-type="${n.filterType}" data-notif-id="${n.id}">
                         <div class="flex items-center gap-5">
                             <div class="relative">
-                                <img src="https://api.dicebear.com/7.x/initials/svg?seed=${n.user}" class="w-12 h-12 bg-slate-900 border border-slate-200">
+                                <img src="https://api.dicebear.com/7.x/initials/svg?seed=${n.user}" class="w-12 h-12 bg-slate-900 border border-slate-200 cursor-pointer" onclick="window.location.href='/user/${n.actorId}'">
                                 ${n.isUnread ? '<div class="absolute -top-1 -right-1 unread-marker border-2 border-white"></div>' : ''}
                             </div>
                             <div>
                                 <h4 class="text-sm font-black uppercase tracking-tighter text-slate-900">${n.user}</h4>
                                 <p class="text-xs text-slate-500 font-medium">${n.text}</p>
-                                <p class="text-[9px] font-black text-slate-400 uppercase mt-2 tracking-widest">${n.time} // <span class="text-blue-600">${n.type}</span></p>
+                                <p class="text-[9px] font-black text-slate-400 uppercase mt-2 tracking-widest">${n.time} // <span class="text-blue-600">${n.filterType}</span></p>
                             </div>
                         </div>
 
                         <div class="action-btns flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                            ${n.type === 'request' ? `
-                                <button class="bg-black text-white px-5 py-2 text-[10px] font-black uppercase hover:bg-slate-800 transition-all">Accept</button>
-                                <button class="border border-slate-200 px-5 py-2 text-[10px] font-black uppercase hover:bg-red-50 hover:text-red-600 transition-all">Decline</button>
+                            ${isFollowRequest ? `
+                                <button onclick="acceptFollowRequest(${n.id}, ${n.followId})" class="bg-black text-white px-5 py-2 text-[10px] font-black uppercase hover:bg-slate-800 transition-all">Accept</button>
+                                <button onclick="declineFollowRequest(${n.id}, ${n.followId})" class="border border-slate-200 px-5 py-2 text-[10px] font-black uppercase hover:bg-red-50 hover:text-red-600 transition-all">Decline</button>
                             ` : `
                                 <button class="bg-slate-100 px-5 py-2 text-[10px] font-black uppercase hover:bg-slate-200 transition-all">View</button>
                             `}
@@ -206,7 +309,7 @@
         });
 
         // Initialize on load
-        window.onload = () => renderFeed('all');
+        window.onload = () => loadNotifications();
     </script>
   <script src="{{ asset('app.js') }}"></script>
 

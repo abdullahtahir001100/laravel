@@ -53,7 +53,7 @@
             </div>
 
             <div class="space-y-1">
-                <a href="{{ route('dashboard') }}" class="nav-link rounded-custom {{ $isRoute('dashboard') ? 'active' : '' }}">
+                <a href="{{ route('facebook') }}" class="nav-link rounded-custom {{ $isRoute('facebook') ? 'active' : '' }}">
                     <svg
                         fill="none"
                         stroke="currentColor"

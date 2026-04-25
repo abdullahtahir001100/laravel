@@ -1,10 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 
+@php
+    $profileUser = $profileUser ?? auth()->user();
+    $isOwnProfile = $isOwnProfile ?? (auth()->check() && auth()->id() === $profileUser?->id);
+    $profileFullName = trim(($profileUser?->first_name ?? '') . ' ' . ($profileUser?->last_name ?? '')) ?: 'User';
+    $profileDisplayName = $profileUser?->display_name ?: $profileFullName;
+    $profileCoverUrl = $profileUser?->cover_photo_path ? asset('storage/' . $profileUser->cover_photo_path) : 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1800';
+    $profileAvatarUrl = $profileUser?->avatar_path ? asset('storage/' . $profileUser->avatar_path) : 'https://ui-avatars.com/api/?name=' . urlencode($profileDisplayName) . '&background=1665d8&color=fff&size=260';
+@endphp
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Profile | Full Final</title>
+    <title>{{ $profileDisplayName }} | Profile</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <style>
@@ -71,52 +80,60 @@
     </style>
 </head>
 
-<body class="overflow-x-hidden">
+<body class="overflow-x-hidden" data-own-profile="{{ $isOwnProfile ? '1' : '0' }}" data-user-id="{{ $profileUser?->id ?? '' }}">
     <div class="w-full min-h-screen">
        
 
         <section class="max-w-[1600px] mx-auto px-4 md:px-8 pt-4">
             <div class="relative rounded-custom overflow-hidden border border-slate-200 bg-white group">
-                <img id="cover-preview" src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1800" alt="Cover"
+                <img id="cover-preview" src="{{ $profileCoverUrl }}" alt="Cover"
                     class="w-full h-[230px] md:h-[360px] object-cover cursor-pointer">
-                <input id="cover-input" type="file" accept="image/*" class="hidden">
-                <button id="edit-cover-floating"
-                    class="absolute left-4 bottom-4 px-3 py-2 bg-slate-900/70 text-white text-xs font-semibold rounded-custom border border-white/20 hover:bg-slate-900/80">
-                    Change Cover
-                </button>
-                <button id="edit-cover-btn"
-                    class="absolute right-4 bottom-4 px-4 py-2 bg-white text-slate-900 text-sm font-semibold rounded-custom border border-slate-200 hover:bg-slate-50 flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M3 9a2 2 0 012-2h.93a2 2 0 001.66-.89l.82-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.66.89l.82 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
-                        <path d="M12 11a3 3 0 100 6 3 3 0 000-6z"></path>
-                    </svg>
-                    Edit Cover Photo
-                </button>
+                @if($isOwnProfile)
+                    <input id="cover-input" type="file" accept="image/*" class="hidden">
+                    <button id="edit-cover-floating"
+                        class="absolute left-4 bottom-4 px-3 py-2 bg-slate-900/70 text-white text-xs font-semibold rounded-custom border border-white/20 hover:bg-slate-900/80">
+                        Change Cover
+                    </button>
+                    <button id="edit-cover-btn"
+                        class="absolute right-4 bottom-4 px-4 py-2 bg-white text-slate-900 text-sm font-semibold rounded-custom border border-slate-200 hover:bg-slate-50 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M3 9a2 2 0 012-2h.93a2 2 0 001.66-.89l.82-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.66.89l.82 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                            <path d="M12 11a3 3 0 100 6 3 3 0 000-6z"></path>
+                        </svg>
+                        Edit Cover Photo
+                    </button>
+                @endif
             </div>
 
             <div class="relative z-10 -mt-14 md:-mt-20 px-2 md:px-6 pb-3">
                 <div class="flex flex-col lg:flex-row lg:items-end gap-5">
                     <div class="relative w-fit">
-                        <img id="profile-preview" src="https://ui-avatars.com/api/?name=InkByHand&background=1665d8&color=fff&size=260" alt="Profile"
+                        <img id="profile-preview" src="{{ $profileAvatarUrl }}" alt="Profile"
                             class="w-28 h-28 md:w-40 md:h-40 object-cover border-4 border-white shadow-lg rounded-custom bg-slate-100">
-                        <input id="profile-input" type="file" accept="image/*" class="hidden">
-                        <button id="edit-profile-image-btn"
-                            class="absolute -right-2 bottom-2 w-10 h-10 rounded-custom border border-slate-200 bg-white flex items-center justify-center hover:bg-slate-50">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path d="M3 9a2 2 0 012-2h.93a2 2 0 001.66-.89l.82-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.66.89l.82 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
-                                <path d="M12 11a3 3 0 100 6 3 3 0 000-6z"></path>
-                            </svg>
-                        </button>
+                        @if($isOwnProfile)
+                            <input id="profile-input" type="file" accept="image/*" class="hidden">
+                            <button id="edit-profile-image-btn"
+                                class="absolute -right-2 bottom-2 w-10 h-10 rounded-custom border border-slate-200 bg-white flex items-center justify-center hover:bg-slate-50">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path d="M3 9a2 2 0 012-2h.93a2 2 0 001.66-.89l.82-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.66.89l.82 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                                    <path d="M12 11a3 3 0 100 6 3 3 0 000-6z"></path>
+                                </svg>
+                            </button>
+                        @endif
                     </div>
 
                     <div class="flex-1">
-                        <h2 class="text-3xl md:text-4xl font-extrabold">InkByHand Calligraphy</h2>
-                        <p class="text-slate-500 mt-1">1.4K Friends · 68 Posts · 9.2K Followers</p>
+                        <h2 id="profile-name" class="text-3xl md:text-4xl font-extrabold">{{ $profileDisplayName }}</h2>
+                        <p class="text-slate-500 mt-1">{{ $profileUser?->email ?? '' }}</p>
                     </div>
 
                     <div class="flex flex-wrap gap-2 lg:mb-2">
                         <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-custom">Add to Story</button>
-                        <a href="/settings" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 text-sm font-semibold rounded-custom border border-slate-200">Edit Profile</a>
+                        @if($isOwnProfile)
+                            <a href="{{ route('settings.index') }}" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 text-sm font-semibold rounded-custom border border-slate-200">Edit Profile</a>
+                        @else
+                            <button class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 text-sm font-semibold rounded-custom border border-slate-200">Follow</button>
+                        @endif
                         <div class="relative">
                             <button id="profile-menu-toggle"
                                 class="w-10 h-10 rounded-custom bg-slate-100 border border-slate-200 hover:bg-slate-200 flex items-center justify-center">
@@ -150,9 +167,9 @@
                 <section id="about-section" class="card-base p-5">
                     <h3 class="font-bold text-xl mb-4">About</h3>
                     <div class="space-y-3 text-sm text-slate-700">
-                        <p>Founder and instructor at InkByHand Calligraphy.</p>
-                        <p>Studied at Superior College, Lahore.</p>
-                        <p>Lives in Shahdara, Lahore.</p>
+                        <p>{{ $profileUser?->headline ?: 'Founder and instructor at InkByHand Calligraphy.' }}</p>
+                        <p>{{ $profileUser?->about ?: 'Studied at Superior College, Lahore.' }}</p>
+                        <p>{{ $profileUser?->bio ?: 'Lives in Shahdara, Lahore.' }}</p>
                     </div>
                 </section>
 
@@ -315,12 +332,15 @@
 
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
+        const isOwnProfile = document.body.dataset.ownProfile === '1';
+        const CSRF_TOKEN = '{{ csrf_token() }}';
         const profileMenuToggle = document.getElementById('profile-menu-toggle');
         const profileMenu = document.getElementById('profile-menu');
         const coverInput = document.getElementById('cover-input');
         const profileInput = document.getElementById('profile-input');
         const coverPreview = document.getElementById('cover-preview');
         const profilePreview = document.getElementById('profile-preview');
+        const profileName = document.getElementById('profile-name');
         const reelsWrapper = document.getElementById('reels-wrapper');
         const postsFeed = document.getElementById('posts-feed');
         const addPostBtn = document.getElementById('add-post-btn');
@@ -391,6 +411,47 @@
             imageElement.onload = function() {
                 URL.revokeObjectURL(previewUrl);
             };
+
+            return file;
+        }
+
+        async function uploadProfileMedia(file, type) {
+            if (!file) return;
+
+            const formData = new FormData();
+            if (type === 'profile') formData.append('profile_image', file);
+            if (type === 'cover') formData.append('cover_photo', file);
+
+            const response = await fetch('/api/profile/media', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': CSRF_TOKEN,
+                    Accept: 'application/json'
+                },
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error('Upload failed');
+            }
+
+            return response.json();
+        }
+
+        async function hydrateProfileFromApi() {
+            if (!isOwnProfile) return;
+
+            const response = await fetch('/api/settings/read', {
+                method: 'GET',
+                headers: { Accept: 'application/json' }
+            });
+
+            if (!response.ok) return;
+
+            const data = await response.json();
+            if (data?.profile?.avatarUrl) profilePreview.src = data.profile.avatarUrl;
+            if (data?.profile?.coverPhotoUrl) coverPreview.src = data.profile.coverPhotoUrl;
+            if (data?.profile?.displayName) profileName.textContent = data.profile.displayName;
         }
 
         function openImagePicker(input) {
@@ -484,12 +545,35 @@
             sharePopup.classList.remove('hidden');
         }
 
-        document.getElementById('edit-cover-btn').addEventListener('click', () => openImagePicker(coverInput));
-        document.getElementById('edit-cover-floating').addEventListener('click', () => openImagePicker(coverInput));
-        coverPreview.addEventListener('click', () => openImagePicker(coverInput));
-        document.getElementById('edit-profile-image-btn').addEventListener('click', () => openImagePicker(profileInput));
-        coverInput.addEventListener('change', () => fileToPreview(coverInput, coverPreview));
-        profileInput.addEventListener('change', () => fileToPreview(profileInput, profilePreview));
+        if (isOwnProfile) {
+            document.getElementById('edit-cover-btn')?.addEventListener('click', () => openImagePicker(coverInput));
+            document.getElementById('edit-cover-floating')?.addEventListener('click', () => openImagePicker(coverInput));
+            coverPreview?.addEventListener('click', () => openImagePicker(coverInput));
+            document.getElementById('edit-profile-image-btn')?.addEventListener('click', () => openImagePicker(profileInput));
+            coverInput?.addEventListener('change', async () => {
+                const file = fileToPreview(coverInput, coverPreview);
+                if (!file) return;
+
+                try {
+                    const res = await uploadProfileMedia(file, 'cover');
+                    if (res?.coverPhotoUrl) coverPreview.src = res.coverPhotoUrl;
+                } catch (err) {
+                    alert('Cover photo upload failed.');
+                }
+            });
+
+            profileInput?.addEventListener('change', async () => {
+                const file = fileToPreview(profileInput, profilePreview);
+                if (!file) return;
+
+                try {
+                    const res = await uploadProfileMedia(file, 'profile');
+                    if (res?.avatarUrl) profilePreview.src = res.avatarUrl;
+                } catch (err) {
+                    alert('Profile image upload failed.');
+                }
+            });
+        }
 
         document.getElementById('see-all-photos-btn').addEventListener('click', () => {
             photosPopup.classList.remove('hidden');
@@ -634,6 +718,7 @@
 
         renderReels();
         renderPosts();
+        hydrateProfileFromApi();
 
         new Swiper('.myReels', {
             slidesPerView: 'auto',

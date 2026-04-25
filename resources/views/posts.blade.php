@@ -16,11 +16,11 @@
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
         .post-card { transition: border-color 0.3s; }
         .active-post-border { border-color: #0062ff !important; border-width: 2px; }
+        .mobile-comment-box { display: none; }
         
         /* Mobile vs Desktop logic */
         @media (max-width: 1024px) {
             #sidebar-comments { display: none !important; }
-            .mobile-comment-box { display: block; }
             body { overflow-y: auto; height: auto; }
         }
       main {
@@ -46,57 +46,7 @@ main::-webkit-scrollbar {
 <div class="flex  mx-auto h-full lg:h-screen">
     <x-dashboard-sidebar />
     <main id="main-feed" class="flex-1 overflow-y-auto p-4 md:p-8 hide-scrollbar space-y-6">
-        <?php for($i=1; $i<=10; $i++): ?>
-        <div class="post-card bg-white border border-slate-200 rounded-custom relative" id="post-<?php echo $i; ?>" data-post-id="<?php echo $i; ?>">
-            <div class="p-4 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user<?php echo $i; ?>" class="w-10 h-10 rounded-custom border">
-                    <div>
-                        <h4 class="text-sm font-bold text-slate-900">User Account <?php echo $i; ?></h4>
-                        <p class="text-[10px] text-slate-400 font-bold uppercase">Posted Just Now</p>
-                    </div>
-                </div>
-                <div class="relative">
-                    <button onclick="togglePostMenu(<?php echo $i; ?>)" class="p-1 hover:bg-slate-100 rounded-custom">
-                        <svg class="w-5 h-5 text-slate-400" fill="currentColor" viewBox="0 0 20 20"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path></svg>
-                    </button>
-                    <div id="menu-<?php echo $i; ?>" class="hidden absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-custom p-2 z-20 shadow-xl">
-                        <button onclick="removePost(<?php echo $i; ?>)" class="w-full text-left p-2 text-sm text-red-500 hover:bg-red-50 rounded-custom flex items-center gap-2 font-medium">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
-                            Not Interested
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="px-4 pb-3 text-sm text-slate-700">Checking out the final version of the Connect Feed! Looks clean with GSAP. 🔥</div>
-            <img src="https://picsum.photos/800/500?random=<?php echo $i; ?>" class="w-full aspect-video object-cover bg-slate-100 border-y border-slate-50">
-
-            <div class="p-3 flex items-center justify-between">
-                <div class="flex items-center gap-6">
-                    <button onclick="likeAnim(this)" class="group flex items-center gap-1.5">
-                        <svg class="w-6 h-6 text-slate-500 group-hover:text-red-500 transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
-                    </button>
-                    <button onclick="toggleMobileComments(<?php echo $i; ?>)" class="flex items-center gap-1.5 text-slate-500 hover:text-blue-600">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-                    </button>
-                    <button onclick="openModal('share-modal')" class="text-slate-500 hover:text-green-600">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
-                    </button>
-                </div>
-                <button onclick="openModal('likes-modal')" class="text-[11px] font-bold text-slate-400 hover:text-slate-900 transition-colors uppercase">View All Likes</button>
-            </div>
-
-            <div id="mobile-comments-<?php echo $i; ?>" class="hidden lg:hidden border-t border-slate-100 p-4 bg-slate-50">
-                <div class="space-y-3 mb-4" id="mobile-list-<?php echo $i; ?>">
-                    </div>
-                <div class="flex gap-2">
-                    <input type="text" placeholder="Write a comment..." class="flex-1 bg-white border border-slate-200 rounded-custom px-3 py-2 text-xs outline-none">
-                    <button class="bg-blue-600 text-white px-4 py-2 rounded-custom text-xs font-bold">Post</button>
-                </div>
-            </div>
-        </div>
-        <?php endfor; ?>
+        <div id="posts-list" class="space-y-6"></div>
     </main>
 
     <aside id="sidebar-comments" class="hidden lg:flex flex-col w-[450px] bg-white border-l border-slate-200">
@@ -156,101 +106,240 @@ main::-webkit-scrollbar {
 </div>
 
 <script>
-    let activePostId = 1;
+    const CSRF_TOKEN = '{{ csrf_token() }}';
+    const postsList = document.getElementById('posts-list');
+    const sideComments = document.getElementById('comment-scroll-area');
+    const commentInput = document.getElementById('comment-input');
+    const currentPostLabel = document.getElementById('current-post-label');
+    const headerSearchInput = document.getElementById('header-content-search');
+    let activePostId = null;
+    let currentTag = '';
+    let items = [];
 
-    // 1. SCROLL OBSERVER (Desktop Side Panel Update)
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting && window.innerWidth > 1024) {
-                updateActivePost(entry.target.getAttribute('data-post-id'));
-            }
+    async function loadPosts() {
+        const params = new URLSearchParams({ scope: 'posts' });
+        if (currentTag) params.set('tag', currentTag);
+
+        const response = await fetch('/api/feed?' + params.toString(), {
+            headers: { Accept: 'application/json' }
         });
-    }, { root: document.getElementById('main-feed'), threshold: 0.6 });
 
-    document.querySelectorAll('.post-card').forEach(post => observer.observe(post));
-
-    function updateActivePost(id) {
-        if(activePostId == id) return;
-        activePostId = id;
-        document.querySelectorAll('.post-card').forEach(p => p.classList.remove('active-post-border'));
-        document.getElementById(`post-${id}`).classList.add('active-post-border');
-        document.getElementById('current-post-label').innerText = `Viewing Post #${id}`;
-
-        const area = document.getElementById('comment-scroll-area');
-        gsap.to(area, { opacity: 0, duration: 0.2, onComplete: () => {
-            area.innerHTML = mockComments(id);
-            gsap.to(area, { opacity: 1, duration: 0.3 });
-        }});
+        if (!response.ok) return;
+        const data = await response.json();
+        items = data.data || [];
+        renderPosts();
+        if (items[0]) setActivePost(items[0].id);
     }
 
-    // 2. MOBILE COMMENT TOGGLE (Facebook Style)
-    function toggleMobileComments(id) {
-        const box = document.getElementById(`mobile-comments-${id}`);
-        const list = document.getElementById(`mobile-list-${id}`);
-        
-        if(box.classList.contains('hidden')) {
-            list.innerHTML = mockComments(id);
-            box.classList.remove('hidden');
-            gsap.from(box, { height: 0, opacity: 0, duration: 0.4, ease: "power2.out" });
-        } else {
-            gsap.to(box, { height: 0, opacity: 0, duration: 0.3, onComplete: () => box.classList.add('hidden') });
-        }
-    }
-
-    function mockComments(id) {
-        let html = '';
-        for(let j=1; j<=3; j++) {
-            html += `
-                <div class="flex gap-2 items-start">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=c${id}${j}" class="w-7 h-7 rounded-custom">
-                    <div class="bg-white lg:bg-slate-100/50 p-2 rounded-custom flex-1 border border-slate-100">
-                        <p class="text-[10px] font-bold">User_${id}_${j}</p>
-                        <p class="text-[11px] text-slate-600 mt-0.5">Epic content for post #${id}!</p>
+    function postTemplate(item) {
+        return `
+            <div class="post-card bg-white border border-slate-200 rounded-custom relative" id="post-${item.id}" data-post-id="${item.id}">
+                <div class="p-4 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <img src="${item.authorAvatarUrl || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(item.authorName)}" class="w-10 h-10 rounded-custom border cursor-pointer" onclick="window.location.href='${item.authorProfileUrl}'">
+                        <div>
+                            <h4 class="text-sm font-bold text-slate-900">${item.authorName}</h4>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase">${item.publishedAt || 'Just now'}</p>
+                        </div>
                     </div>
-                </div>`;
+                    <div class="relative">
+                        <button onclick="togglePostMenu(${item.id})" class="p-1 hover:bg-slate-100 rounded-custom">
+                            <svg class="w-5 h-5 text-slate-400" fill="currentColor" viewBox="0 0 20 20"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path></svg>
+                        </button>
+                        <div id="menu-${item.id}" class="hidden absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-custom p-2 z-20 shadow-xl">
+                            <button onclick="markNotInterested(${item.id})" class="w-full text-left p-2 text-sm text-red-500 hover:bg-red-50 rounded-custom flex items-center gap-2 font-medium">Not Interested</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="px-4 pb-3 text-sm text-slate-700">${item.description || item.title || ''}</div>
+                <img src="${item.mediaUrl || 'https://picsum.photos/800/500'}" class="w-full aspect-video object-cover bg-slate-100 border-y border-slate-50">
+
+                <div class="px-4 pt-2 text-[11px] text-slate-500">Tags: ${(item.tags || []).join(', ') || '-'}</div>
+                <div class="p-3 flex items-center justify-between">
+                    <div class="flex items-center gap-6">
+                        <button onclick="toggleLike(${item.id})" class="group flex items-center gap-1.5 ${item.likedByMe ? 'text-red-500' : 'text-slate-500'}">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                            <span id="likes-${item.id}" class="text-xs font-bold">${item.likesCount}</span>
+                        </button>
+                        <button onclick="handleCommentClick(${item.id})" class="flex items-center gap-1.5 text-slate-500 hover:text-blue-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                            <span class="text-xs font-bold">${item.commentsCount}</span>
+                        </button>
+                        <button onclick="openShareModal(${item.id})" class="flex items-center gap-1.5 text-slate-500 hover:text-emerald-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+                            <span class="text-xs font-bold">Share</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mobile-comment-box hidden lg:hidden border-t border-slate-100 p-4 bg-slate-50" id="mobile-comments-${item.id}">
+                    <div class="space-y-3 mb-4" id="mobile-list-${item.id}"></div>
+                    <form onsubmit="postMobileComment(event, ${item.id})" class="flex gap-2">
+                        <input type="text" id="mobile-comment-input-${item.id}" placeholder="Write a comment..." class="flex-1 bg-white border border-slate-200 rounded-custom px-3 py-2 text-xs outline-none">
+                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-custom text-xs font-bold">Post</button>
+                    </form>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderPosts() {
+        if (!items || items.length === 0) {
+            postsList.innerHTML = `
+                <div class="bg-white rounded-custom border border-slate-200 p-12 text-center">
+                    <div class="mb-4">
+                        <svg class="w-16 h-16 mx-auto text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 mb-2">No Posts Yet</h3>
+                    <p class="text-sm text-slate-500 mb-4">When you or your friends post images, they'll show up here.</p>
+                    <a href="/facebook" class="text-xs font-semibold text-blue-600 hover:text-blue-700">Go to Main Feed</a>
+                </div>
+            `;
+            document.getElementById('sidebar-comments').classList.add('hidden');
+            return;
         }
-        return html;
+        postsList.innerHTML = items.map(postTemplate).join('');
+        if (items[0]) {
+            setActivePost(items[0].id);
+        }
     }
 
-    // 3. ACTIONS
-    function postComment(e) {
+    async function toggleLike(itemId) {
+        const response = await fetch(`/api/content-items/${itemId}/like`, {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': CSRF_TOKEN, Accept: 'application/json' }
+        });
+        if (!response.ok) return;
+        const data = await response.json();
+        const item = items.find((entry) => entry.id === itemId);
+        if (!item) return;
+        item.likedByMe = data.liked;
+        item.likesCount = data.likesCount;
+        renderPosts();
+    }
+
+    async function setActivePost(itemId) {
+        activePostId = itemId;
+        document.querySelectorAll('.post-card').forEach((card) => card.classList.remove('active-post-border'));
+        document.getElementById(`post-${itemId}`)?.classList.add('active-post-border');
+        currentPostLabel.textContent = `Viewing Post #${itemId}`;
+
+        const response = await fetch(`/api/content-items/${itemId}/comments`, { headers: { Accept: 'application/json' } });
+        if (!response.ok) return;
+        const data = await response.json();
+        const comments = data.comments || data.data || [];
+        const commentMarkup = comments.map((comment) => `
+            <div class="flex gap-2 items-start">
+                <img src="${comment.user.avatarUrl || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(comment.user.displayName)}" class="w-7 h-7 rounded-custom">
+                <div class="bg-white lg:bg-slate-100/50 p-2 rounded-custom flex-1 border border-slate-100">
+                    <p class="text-[10px] font-bold">${comment.user.displayName}</p>
+                    <p class="text-[11px] text-slate-600 mt-0.5">${comment.body}</p>
+                </div>
+            </div>
+        `).join('');
+        sideComments.innerHTML = commentMarkup;
+        const mobileList = document.getElementById(`mobile-list-${itemId}`);
+        if (mobileList) mobileList.innerHTML = commentMarkup;
+    }
+
+    async function postComment(e) {
         e.preventDefault();
-        const input = document.getElementById('comment-input');
-        if(!input.value) return;
-        const area = document.getElementById('comment-scroll-area');
-        const newHtml = `<div class="flex gap-3 opacity-0"><div class="bg-white p-3 rounded-custom border border-blue-100 flex-1"><p class="text-[11px] font-bold">You</p><p class="text-xs text-slate-600">${input.value}</p></div></div>`;
-        area.insertAdjacentHTML('afterbegin', newHtml);
-        gsap.to(area.firstChild, { opacity: 1, duration: 0.5 });
+        if (!activePostId) return;
+        const body = commentInput.value.trim();
+        if (!body) return;
+
+        const response = await fetch(`/api/content-items/${activePostId}/comments`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': CSRF_TOKEN,
+                Accept: 'application/json'
+            },
+            body: JSON.stringify({ body })
+        });
+
+        if (!response.ok) return;
+        commentInput.value = '';
+        await setActivePost(activePostId);
+        await loadPosts();
+    }
+
+    async function markNotInterested(itemId) {
+        const response = await fetch(`/api/content-items/${itemId}/not-interested`, {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': CSRF_TOKEN, Accept: 'application/json' }
+        });
+
+        if (!response.ok) return;
+        items = items.filter((entry) => entry.id !== itemId);
+        renderPosts();
+        if (items[0]) setActivePost(items[0].id);
+    }
+
+    async function postMobileComment(event, itemId) {
+        event.preventDefault();
+        const input = document.getElementById(`mobile-comment-input-${itemId}`);
+        const body = input?.value.trim();
+        if (!body) return;
+
+        const response = await fetch(`/api/content-items/${itemId}/comments`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': CSRF_TOKEN,
+                Accept: 'application/json'
+            },
+            body: JSON.stringify({ body })
+        });
+
+        if (!response.ok) return;
         input.value = '';
+        await setActivePost(itemId);
+        await loadPosts();
     }
 
-    function openModal(modalId) {
-        const m = document.getElementById(modalId);
-        m.style.display = 'flex';
-        gsap.fromTo(m.querySelector('div'), { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(1.7)" });
+    function handleCommentClick(itemId) {
+        if (window.innerWidth <= 1024) {
+            const commentBox = document.getElementById(`mobile-comments-${itemId}`);
+            const shouldOpen = commentBox?.classList.contains('hidden');
+
+            document.querySelectorAll('.mobile-comment-box').forEach((entry) => {
+                entry.classList.add('hidden');
+            });
+
+            if (shouldOpen) {
+                commentBox?.classList.remove('hidden');
+            }
+        }
+
+        setActivePost(itemId);
     }
 
-    function closeModals() {
-        document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
-    }
-
-    function likeAnim(btn) {
-        btn.classList.toggle('text-red-500');
-        anime({ targets: btn.querySelector('svg'), scale: [1, 1.5, 1], duration: 400 });
+    function openShareModal(itemId) {
+        const input = document.getElementById('share-link');
+        if (input) input.value = `${window.location.origin}/posts?post=${itemId}`;
+        document.getElementById('share-modal').style.display = 'flex';
     }
 
     function togglePostMenu(id) {
         const menu = document.getElementById(`menu-${id}`);
-        menu.classList.toggle('hidden');
-        if(!menu.classList.contains('hidden')) gsap.from(menu, { opacity: 0, y: -10, duration: 0.2 });
+        document.querySelectorAll('[id^="menu-"]').forEach((entry) => {
+            if (entry.id !== `menu-${id}`) entry.classList.add('hidden');
+        });
+        menu?.classList.toggle('hidden');
     }
 
-    function removePost(id) {
-        gsap.to(`#post-${id}`, { opacity: 0, scale: 0.8, duration: 0.4, onComplete: () => document.getElementById(`post-${id}`).remove() });
+    function closeModals() {
+        document.querySelectorAll('.modal-overlay').forEach((m) => m.style.display = 'none');
     }
 
-    // Initial Load
-    if(window.innerWidth > 1024) document.getElementById('comment-scroll-area').innerHTML = mockComments(1);
+    headerSearchInput?.addEventListener('change', async (e) => {
+        currentTag = (e.target.value || '').trim();
+        await loadPosts();
+    });
+
+    loadPosts();
 </script>
   <script src="{{ asset('app.js') }}"></script>
 

@@ -61,6 +61,7 @@
 
 		.form-input:focus,
 		.form-select:focus,
+		const SETTINGS_KEYS = Object.keys(DEFAULT_VALUES).filter((key) => !PROFILE_KEYS.includes(key));
 		.form-textarea:focus {
 			border-color: #7db1ff;
 			box-shadow: 0 0 0 3px rgba(15, 98, 254, 0.12);
@@ -297,7 +298,7 @@
 						title: 'Password And Recovery',
 						description: 'Update credentials and recovery channels.',
 						fields: [
-							{ key: 'currentPassword', type: 'password', label: 'Current Password', required: true },
+							{ key: 'currentPassword', type: 'password', label: 'Current Password' },
 							{ key: 'newPassword', type: 'password', label: 'New Password' },
 							{ key: 'confirmPassword', type: 'password', label: 'Confirm Password' },
 							{ key: 'recoveryEmail', type: 'email', label: 'Recovery Email' }
@@ -488,7 +489,9 @@
 			gdprMode: false
 		};
 
-		const STORAGE_KEY = 'settingsModule.v1';
+		const CSRF_TOKEN = '{{ csrf_token() }}';
+		const PROFILE_KEYS = ['fullName', 'displayName', 'username', 'pronouns', 'email', 'phone', 'country', 'city', 'headline', 'about', 'bio', 'website'];
+		const SETTINGS_KEYS = Object.keys(DEFAULT_VALUES).filter((key) => !PROFILE_KEYS.includes(key));
 		const state = {
 			values: structuredClone(DEFAULT_VALUES),
 			original: structuredClone(DEFAULT_VALUES),
@@ -511,20 +514,64 @@
 			groupTemplate: document.getElementById('groupTemplate')
 		};
 
-		function loadPersisted() {
-			try {
-				const raw = localStorage.getItem(STORAGE_KEY);
-				if (!raw) return;
-				const parsed = JSON.parse(raw);
-				state.values = { ...state.values, ...parsed };
-				state.original = structuredClone(state.values);
-			} catch (err) {
-				showToast('Could not load saved settings.', 'warn');
-			}
+		function getSectionFieldKeys(sectionId) {
+			const section = SETTINGS_SCHEMA.find((s) => s.id === sectionId);
+			if (!section) return [];
+			return section.groups.flatMap((group) => group.fields.map((field) => field.key));
 		}
 
-		function persistValues() {
-			localStorage.setItem(STORAGE_KEY, JSON.stringify(state.values));
+		function buildPayload() {
+			const payload = { settings: {} };
+
+			PROFILE_KEYS.forEach((key) => {
+				payload[key] = state.values[key] ?? null;
+			});
+
+			SETTINGS_KEYS.forEach((key) => {
+				payload.settings[key] = state.values[key];
+			});
+
+			return payload;
+		}
+
+		async function loadFromApi() {
+			const response = await fetch('/api/settings/read', {
+				method: 'GET',
+				headers: { Accept: 'application/json' }
+			});
+
+			if (!response.ok) {
+				throw new Error('Unable to read settings from server.');
+			}
+
+			const data = await response.json();
+			const merged = { ...DEFAULT_VALUES, ...(data.settings || {}) };
+
+			PROFILE_KEYS.forEach((key) => {
+				if (data.profile && data.profile[key] !== undefined && data.profile[key] !== null) {
+					merged[key] = data.profile[key];
+				}
+			});
+
+			state.values = merged;
+			state.original = structuredClone(merged);
+			state.dirty.clear();
+		}
+
+		async function saveToApi() {
+			const response = await fetch('/api/settings/update', {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+					Accept: 'application/json',
+					'X-CSRF-TOKEN': CSRF_TOKEN
+				},
+				body: JSON.stringify(buildPayload())
+			});
+
+			if (!response.ok) {
+				throw new Error('Unable to save settings to server.');
+			}
 		}
 
 		function buildNav() {
@@ -716,7 +763,7 @@
 			return allValid;
 		}
 
-		function saveSection(sectionId) {
+		async function saveSection(sectionId) {
 			if (!validateSection(sectionId)) {
 				showToast('Please fix errors in this section.', 'danger');
 				return;
@@ -725,19 +772,23 @@
 			const section = SETTINGS_SCHEMA.find((s) => s.id === sectionId);
 			if (!section) return;
 
-			section.groups.forEach((group) => {
-				group.fields.forEach((field) => {
-					state.original[field.key] = structuredClone(state.values[field.key]);
-					state.dirty.delete(field.key);
-				});
+			try {
+				await saveToApi();
+			} catch (err) {
+				showToast('Could not save section to server.', 'danger');
+				return;
+			}
+
+			getSectionFieldKeys(sectionId).forEach((key) => {
+				state.original[key] = structuredClone(state.values[key]);
+				state.dirty.delete(key);
 			});
 
-			persistValues();
 			updateDirtyUI();
 			showToast(section.title + ' saved.', 'ok');
 		}
 
-		function saveAll() {
+		async function saveAll() {
 			let allValid = true;
 			getVisibleSections().forEach((section) => {
 				if (!validateSection(section.id)) allValid = false;
@@ -748,9 +799,15 @@
 				return;
 			}
 
+			try {
+				await saveToApi();
+			} catch (err) {
+				showToast('Could not save settings to server.', 'danger');
+				return;
+			}
+
 			state.original = structuredClone(state.values);
 			state.dirty.clear();
-			persistValues();
 			updateDirtyUI();
 			showToast('All settings saved successfully.', 'ok');
 		}
@@ -854,11 +911,20 @@
 		refs.saveAllBtn.addEventListener('click', saveAll);
 		refs.discardAllBtn.addEventListener('click', discardAll);
 
-		loadPersisted();
-		buildNav();
-		buildSections();
-		activateSection('profile', true);
-		updateDirtyUI();
+		async function initializeSettings() {
+			try {
+				await loadFromApi();
+			} catch (err) {
+				showToast('Server settings unavailable. Loaded defaults.', 'warn');
+			}
+
+			buildNav();
+			buildSections();
+			activateSection('profile', true);
+			updateDirtyUI();
+		}
+
+		initializeSettings();
 
 		gsap.fromTo('header.panel', { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.38, ease: 'power2.out' });
 		gsap.fromTo('.panel', { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.3, stagger: 0.05, ease: 'power2.out' });

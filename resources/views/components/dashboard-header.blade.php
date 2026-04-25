@@ -30,23 +30,25 @@
   </div>
 
   <div class="relative" id="user-menu-container">
-    <button id="user-menu-button"
+    <div id="user-menu-button" 
       class="flex items-center gap-2 hover:bg-slate-50 p-1 rounded-custom transition-all border border-transparent hover:border-slate-100">
       <div class="w-9 h-9 bg-slate-200 rounded-custom overflow-hidden">
-        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sheri" alt="User avatar">
+      <a href="{{ auth()->check() ? route('user.profile', auth()->id()) : route('login') }}">
+        <img src="{{ auth()->user()?->avatar_path ? asset('storage/' . auth()->user()->avatar_path) : 'https://api.dicebear.com/7.x/avataaars/svg?seed=' . urlencode(auth()->user()?->display_name ?? auth()->user()?->first_name ?? 'User') }}" alt="User avatar">
+        </a>
       </div>
       <svg class="w-4 h-4 text-slate-400 transition-transform duration-200" id="chevron-icon"
         fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path d="M19 9l-7 7-7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         </path>
       </svg>
-    </button>
+    </div>
 
     <div id="user-dropdown"
       class="hidden absolute right-0 mt-3 w-64 bg-white rounded-custom shadow-2xl border border-slate-100 p-2 transform origin-top-right transition-all">
       <div class="p-3 border-b border-slate-50 mb-2">
-        <p class="text-sm font-bold text-slate-900">Sheri</p>
-        <p class="text-xs text-slate-500">itssheriofficial@mail.com</p>
+        <p class="text-sm font-bold text-slate-900">{{ auth()->user()?->display_name ?? trim((auth()->user()?->first_name ?? '') . ' ' . (auth()->user()?->last_name ?? '')) ?: 'User' }}</p>
+        <p class="text-xs text-slate-500">{{ auth()->user()?->email ?? '' }}</p>
       </div>
 
       <button onclick="window.location.href='{{ route('settings.index') }}'"
@@ -59,7 +61,7 @@
         User Settings
       </button>
 
-      <button onclick="window.location.href='{{ route('dashboard') }}'"
+      <button onclick="window.location.href='{{ route('facebook') }}'"
         class="w-full text-left p-2 text-sm hover:bg-slate-50 rounded-custom flex items-center gap-3 text-slate-700">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-4 h-4">
           <path d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>

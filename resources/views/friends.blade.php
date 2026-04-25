@@ -56,28 +56,8 @@
             </div>
         </div>
 
-        <?php
-        $users = [
-            ['name' => 'Sheri Official', 'email' => 'itssheriofficial@mail.com', 'avatar' => 'Sheri', 'status' => 'Active'],
-            ['name' => 'Alex Rivera', 'email' => 'alex.r@connect.com', 'avatar' => 'Alex', 'status' => 'Away'],
-            ['name' => 'Jordan Smith', 'email' => 'jordan.s@social.com', 'avatar' => 'Jordan', 'status' => 'Active'],
-            ['name' => 'Sarah Chen', 'email' => 'schen@dev.io', 'avatar' => 'Sarah', 'status' => 'Active'],
-            ['name' => 'Marcus Brown', 'email' => 'mbrown@pulse.com', 'avatar' => 'Marcus', 'status' => 'Offline'],
-        ];
-        ?>
-
         <div id="view-grid" class="view-container view-active max-w-6xl mx-auto">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <?php foreach ($users as $u): ?>
-                <div class="user-card bg-white border border-slate-200 p-4 rounded-custom flex items-center gap-4">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=<?= $u['avatar'] ?>" class="w-12 h-12 rounded-custom bg-slate-50">
-                    <div class="truncate">
-                        <h3 class="text-sm font-bold text-slate-900 truncate"><?= $u['name'] ?></h3>
-                        <p class="text-xs text-slate-500"><?= $u['email'] ?></p>
-                    </div>
-                </div>
-                <?php endforeach; ?>
-            </div>
+            <div id="friends-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
         </div>
 
         <div id="view-table" class="view-container max-w-6xl mx-auto">
@@ -91,52 +71,25 @@
                             <th class="px-6 py-3 text-xs font-bold text-slate-500 uppercase text-right">Action</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <?php foreach ($users as $u): ?>
-                        <tr class="border-b border-slate-100 last:border-0 transition-colors">
-                            <td class="px-6 py-4 flex items-center gap-3">
-                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=<?= $u['avatar'] ?>" class="w-8 h-8 rounded-custom">
-                                <span class="text-sm font-semibold text-slate-900"><?= $u['name'] ?></span>
-                            </td>
-                            <td class="px-6 py-4 text-sm text-slate-600"><?= $u['email'] ?></td>
-                            <td class="px-6 py-4">
-                                <span class="px-2 py-1 text-[10px] font-bold rounded-custom bg-blue-50 text-blue-600"><?= $u['status'] ?></span>
-                            </td>
-                            <td class="px-6 py-4 text-right">
-                                <button class="text-blue-600 font-bold text-xs">Profile</button>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
+                    <tbody id="friends-table-body"></tbody>
                 </table>
             </div>
         </div>
 
         <div id="view-line" class="view-container max-w-6xl mx-auto">
-            <div class="space-y-3">
-                <?php foreach ($users as $u): ?>
-                <div class="bg-white border border-slate-200 p-3 rounded-custom flex items-center justify-between group hover:border-blue-400 transition-colors">
-                    <div class="flex items-center gap-4">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=<?= $u['avatar'] ?>" class="w-10 h-10 rounded-custom bg-slate-50">
-                        <div>
-                            <h3 class="text-sm font-bold text-slate-900"><?= $u['name'] ?></h3>
-                            <p class="text-xs text-slate-500"><?= $u['email'] ?></p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-6">
-                        <span class="hidden md:block text-xs text-slate-400 italic">Added 2 days ago</span>
-                        <button class="bg-slate-900 text-white px-4 py-1.5 rounded-custom text-xs font-medium hover:bg-blue-600 transition-colors">Un Follow</button>
-                    </div>
-                </div>
-                <?php endforeach; ?>
-            </div>
+            <div id="friends-line" class="space-y-3"></div>
         </div>
 
     </main>
 
     <script>
-        // Initial entrance
-        gsap.to(".view-active", { opacity: 1, duration: 0.5 });
+        const searchInput = document.getElementById('userSearch');
+        const friendsGrid = document.getElementById('friends-grid');
+        const friendsTableBody = document.getElementById('friends-table-body');
+        const friendsLine = document.getElementById('friends-line');
+        let friendsData = [];
+
+        gsap.to('.view-active', { opacity: 1, duration: 0.5 });
 
         function switchView(viewType) {
             const allViews = document.querySelectorAll('.view-container');
@@ -176,8 +129,68 @@
             });
         }
 
-        // Set initial active button state
+        function avatarFor(user) {
+            return user.avatarUrl || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(user.displayName));
+        }
+
+        function renderFriends(list) {
+            friendsGrid.innerHTML = list.map((user) => `
+                <div class="user-card bg-white border border-slate-200 p-4 rounded-custom flex items-center gap-4">
+                    <a href="${user.profileUrl}" class="flex items-center gap-4 min-w-0">
+                        <img src="${avatarFor(user)}" class="w-12 h-12 rounded-custom bg-slate-50">
+                        <div class="truncate">
+                            <h3 class="text-sm font-bold text-slate-900 truncate">${user.displayName}</h3>
+                            <p class="text-xs text-slate-500">${user.email || ''}</p>
+                        </div>
+                    </a>
+                </div>
+            `).join('');
+
+            friendsTableBody.innerHTML = list.map((user) => `
+                <tr class="border-b border-slate-100 last:border-0 transition-colors">
+                    <td class="px-6 py-4 flex items-center gap-3">
+                        <img src="${avatarFor(user)}" class="w-8 h-8 rounded-custom">
+                        <span class="text-sm font-semibold text-slate-900">${user.displayName}</span>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-slate-600">${user.email || ''}</td>
+                    <td class="px-6 py-4"><span class="px-2 py-1 text-[10px] font-bold rounded-custom bg-blue-50 text-blue-600">Friend</span></td>
+                    <td class="px-6 py-4 text-right"><a href="${user.profileUrl}" class="text-blue-600 font-bold text-xs">Profile</a></td>
+                </tr>
+            `).join('');
+
+            friendsLine.innerHTML = list.map((user) => `
+                <div class="bg-white border border-slate-200 p-3 rounded-custom flex items-center justify-between group hover:border-blue-400 transition-colors">
+                    <a href="${user.profileUrl}" class="flex items-center gap-4">
+                        <img src="${avatarFor(user)}" class="w-10 h-10 rounded-custom bg-slate-50">
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-900">${user.displayName}</h3>
+                            <p class="text-xs text-slate-500">${user.email || ''}</p>
+                        </div>
+                    </a>
+                    <span class="text-xs text-slate-400 italic">Following each other</span>
+                </div>
+            `).join('');
+        }
+
+        async function loadFriends() {
+            const response = await fetch('/api/friends', { headers: { Accept: 'application/json' } });
+            if (!response.ok) return;
+
+            const data = await response.json();
+            friendsData = data.friends || [];
+            renderFriends(friendsData);
+        }
+
+        searchInput?.addEventListener('input', (e) => {
+            const q = (e.target.value || '').toLowerCase();
+            const filtered = friendsData.filter((user) => {
+                return (user.displayName || '').toLowerCase().includes(q) || (user.email || '').toLowerCase().includes(q);
+            });
+            renderFriends(filtered);
+        });
+
         document.getElementById('btn-grid').classList.add('bg-blue-50', 'text-blue-600');
+        loadFriends();
     </script>
   <script src="{{ asset('app.js') }}"></script>
 
