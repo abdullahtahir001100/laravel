@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ContentItemController;
+use App\Http\Controllers\MessageController;
 use App\Http\Controllers\SocialController;
 use App\Http\Controllers\UserSettingsController;
 use App\Models\User;
@@ -48,7 +49,10 @@ Route::middleware('auth')->group(function () {
     Route::view('/discover', 'live')->name('live.index');
     Route::view('/live', 'live')->name('live.page');
    Route::view('/settings', 'settings')->name('settings.index');
-   Route::view('/messages', 'messages')->name('messages.index');
+   Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
+   Route::post('/messages/send', [MessageController::class, 'store'])->name('messages.store');
+   Route::post('/messages/read', [MessageController::class, 'markRead'])->name('messages.read');
+   Route::post('/send', [MessageController::class, 'store']);
    Route::get('/user/{user}', function (User $user) {
         return view('user-profile', [
             'profileUser' => $user,

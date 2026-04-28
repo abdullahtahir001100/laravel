@@ -13,6 +13,11 @@
       --bg-main: #f6f8fc;
       --border-clr: #e5eef9;
     }
+    .stickey{
+      position: sticky;
+      
+      top: 0;
+    }
 
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
@@ -66,7 +71,8 @@
         </section>
 
         <aside class="space-y-4">
-          <div class="soft-card rounded-custom p-4">
+        <div class="stickey space-y-4">
+            <div class="soft-card rounded-custom p-4">
             <div class="flex items-start justify-between mb-4">
               <div>
                 <h3 class="text-base font-bold text-slate-900">Suggested Users</h3>
@@ -97,6 +103,7 @@
               <div class="border border-slate-200 rounded-custom p-2 text-center bg-white"><p class="text-sm font-bold text-slate-800">3</p><p class="text-[11px] text-slate-500">Invites</p></div>
             </div>
           </div>
+        </div>
         </aside>
       </div>
     </main>
