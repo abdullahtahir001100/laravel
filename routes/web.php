@@ -50,6 +50,7 @@ Route::middleware('auth')->group(function () {
     Route::view('/live', 'live')->name('live.page');
    Route::view('/settings', 'settings')->name('settings.index');
    Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
+    Route::get('/messages/thread', [MessageController::class, 'thread'])->name('messages.thread');
    Route::post('/messages/send', [MessageController::class, 'store'])->name('messages.store');
    Route::post('/messages/read', [MessageController::class, 'markRead'])->name('messages.read');
    Route::post('/send', [MessageController::class, 'store']);

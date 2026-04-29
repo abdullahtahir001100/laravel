@@ -64,7 +64,12 @@ class MessageController extends Controller
             'body' => trim($validated['message']),
         ]);
 
-        $payload = $this->formatMessage($message->fresh());
+        $message->load([
+            'sender:id,first_name,last_name,display_name,avatar_path',
+            'recipient:id,first_name,last_name,display_name,avatar_path',
+        ]);
+
+        $payload = $this->formatMessage($message);
 
         Log::info('MESSAGE STORED', $payload);
         event(new MessageSent($payload));
@@ -72,6 +77,52 @@ class MessageController extends Controller
         return response()->json([
             'status' => 'sent',
             'message' => $payload,
+        ]);
+    }
+
+    public function thread(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'friend_id' => ['required', 'integer', 'exists:users,id'],
+            'after_id' => ['nullable', 'integer', 'min:0'],
+        ]);
+
+        $authUser = $request->user();
+        $friendId = (int) $validated['friend_id'];
+        $afterId = (int) ($validated['after_id'] ?? 0);
+
+        if (! $this->isAcceptedFriend($authUser->id, $friendId)) {
+            return response()->json([
+                'message' => 'You can only load threads for accepted friends.',
+            ], 403);
+        }
+
+        $query = Message::query()
+            ->betweenUsers($authUser->id, $friendId)
+            ->where('id', '>', $afterId)
+            ->with([
+                'sender:id,first_name,last_name,display_name,avatar_path',
+                'recipient:id,first_name,last_name,display_name,avatar_path',
+            ])
+            ->orderBy('id');
+
+        $messages = $query->get();
+
+        Message::query()
+            ->where('sender_id', $friendId)
+            ->where('recipient_id', $authUser->id)
+            ->whereNull('read_at')
+            ->where('id', '>', $afterId)
+            ->update([
+                'delivered_at' => now(),
+                'read_at' => now(),
+            ]);
+
+        $formatted = $messages->map(fn (Message $message) => $this->formatMessage($message))->values();
+
+        return response()->json([
+            'messages' => $formatted,
+            'last_id' => (int) ($formatted->last()['id'] ?? $afterId),
         ]);
     }
 

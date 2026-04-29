@@ -35,7 +35,7 @@ window.renderIncomingMessage = function (message) {
         .toUpperCase();
 
     return `
-        <div class="flex items-end gap-3 max-w-[75%] animate-fade-in">
+        <div class="flex items-end gap-3 max-w-[75%] animate-fade-in" data-message-id="${window.escapeHtml(message.id || '')}">
             <div class="w-8 h-8 bg-blue-600 rounded-full flex-shrink-0 flex items-center justify-center text-white text-xs font-bold">${window.escapeHtml(initials || 'U')}</div>
             <div>
                 <div class="msg-bubble-them p-4 text-sm shadow-sm leading-relaxed">
@@ -77,6 +77,80 @@ window.renderOutgoingMessage = function (message) {
 const chatState = window.chatState || {};
 const currentUserId = Number(chatState.authUserId || 0);
 const currentChannel = chatState.channel || null;
+let isPollingThread = false;
+
+function getLastMessageId() {
+    const nodes = document.querySelectorAll('[data-message-id]');
+    let maxId = 0;
+
+    nodes.forEach((node) => {
+        const id = Number(node.getAttribute('data-message-id') || 0);
+        if (id > maxId) {
+            maxId = id;
+        }
+    });
+
+    return maxId;
+}
+
+function appendMessage(payload) {
+    if (!payload || !payload.id) {
+        return;
+    }
+
+    const chatBox = document.getElementById('message-container');
+    if (!chatBox) {
+        return;
+    }
+
+    if (chatBox.querySelector(`[data-message-id="${payload.id}"]`)) {
+        return;
+    }
+
+    if (Number(payload.sender_id) === currentUserId) {
+        chatBox.insertAdjacentHTML('beforeend', window.renderOutgoingMessage(payload));
+    } else {
+        chatBox.insertAdjacentHTML('beforeend', window.renderIncomingMessage(payload));
+    }
+
+    chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: 'smooth' });
+    if (window.lucide) {
+        lucide.createIcons();
+    }
+}
+
+function pollThreadUpdates() {
+    if (isPollingThread || !chatState.threadUrl || !chatState.activeFriendId) {
+        return;
+    }
+
+    isPollingThread = true;
+    const afterId = getLastMessageId();
+    const url = `${chatState.threadUrl}?friend_id=${encodeURIComponent(chatState.activeFriendId)}&after_id=${encodeURIComponent(afterId)}`;
+
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            Accept: 'application/json'
+        }
+    })
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then((data) => {
+            const messages = Array.isArray(data.messages) ? data.messages : [];
+            messages.forEach((payload) => appendMessage(payload));
+        })
+        .catch(() => {
+            // Silent fallback poll; websocket may still be active.
+        })
+        .finally(() => {
+            isPollingThread = false;
+        });
+}
 
 if (currentChannel) {
     window.Echo.channel(currentChannel)
@@ -87,16 +161,7 @@ if (currentChannel) {
                 return;
             }
 
-            const chatBox = document.getElementById('message-container');
-            if (!chatBox) {
-                return;
-            }
-
-            chatBox.insertAdjacentHTML('beforeend', window.renderIncomingMessage(payload));
-            chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: 'smooth' });
-            if (window.lucide) {
-                lucide.createIcons();
-            }
+            appendMessage(payload);
 
             if (Number(chatState.activeFriendId || 0) === Number(payload.sender_id) && chatState.markReadUrl) {
                 fetch(chatState.markReadUrl, {
@@ -109,4 +174,8 @@ if (currentChannel) {
                 }).catch(() => {});
             }
         });
+}
+
+if (chatState.threadUrl && chatState.activeFriendId) {
+    setInterval(pollThreadUpdates, 3000);
 }

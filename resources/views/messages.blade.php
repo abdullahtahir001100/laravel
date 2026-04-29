@@ -71,6 +71,7 @@
             activeFriendId: @json($activeFriend['id'] ?? null),
             channel: @json($chatChannel),
             sendUrl: @json(route('messages.store')),
+            threadUrl: @json(route('messages.thread')),
             markReadUrl: @json(route('messages.read')),
         };
     </script>
