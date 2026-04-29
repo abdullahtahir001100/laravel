@@ -93,3 +93,7 @@ Route::middleware('auth')->group(function () {
     // Logout Action
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
+
+Route::get('/test', function () {
+    return view('welcome');
+});
