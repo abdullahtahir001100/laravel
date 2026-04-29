@@ -39,13 +39,26 @@
 
 <aside
     id="sidebar"
-    class="fixed top-16 left-0 h-[calc(100vh-4rem)] w-72 lg:w-64 border-r border-slate-200 bg-white z-30 -translate-x-full transition-transform duration-200 shadow-none self-start"
+    class="fixed top-16 left-0 z-30 h-[calc(100dvh-4rem)] w-72 lg:w-64 -translate-x-full overflow-y-auto overscroll-contain border-r border-slate-200 bg-white transition-transform duration-200 shadow-none self-start"
 >
     @php
         $isRoute = fn (...$names) => request()->routeIs(...$names);
     @endphp
-    <div class="h-full flex flex-col justify-between py-5">
-        <div class="px-4 overflow-y-auto">
+    <div class="min-h-full flex flex-col py-5">
+        <div class="flex items-center justify-end px-4 lg:hidden">
+            <button
+                type="button"
+                class="p-2 rounded-custom border border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50"
+                aria-label="Close sidebar"
+                onclick="document.getElementById('sidebar-backdrop')?.click()"
+            >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M6 18L18 6M6 6l12 12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+            </button>
+        </div>
+
+        <div class="flex-1 px-4 pb-5">
             <div class="mb-5 px-1">
                 <p
                     class="text-[10px] uppercase tracking-[0.35em] text-slate-400 mb-2"

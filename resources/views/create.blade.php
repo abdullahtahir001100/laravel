@@ -3,741 +3,974 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Studio | Create Content</title>
+    <title>Create Post | Studio</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <link href="{{ asset('app.css') }}" rel='stylesheet'>
+    <link href="{{ asset('app.css') }}" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #f0f2f5; color: #0f172a; font-family: 'Inter', sans-serif; }
-        .rounded-custom { border-radius: 5px !important; }
-        .hide-scroll::-webkit-scrollbar { display: none; }
-        
-        .main-content { padding-top: 4rem; }
-        
-        .input-field {
-            border: 1px solid #e2e8f0;
-            border-radius: 5px;
-            padding: 12px;
+        :root {
+            --ink-900: #10243a;
+            --ink-700: #2e4a66;
+            --ink-500: #5f7892;
+            --surface-0: #f4f8ff;
+            --surface-1: #ffffff;
+            --line-soft: #d9e5f3;
+            --brand-600: #0f74ff;
+            --brand-500: #2e87ff;
+            --good-500: #0da271;
+            --warn-500: #f59e0b;
+        }
+
+        body {
+            font-family: 'Sora', sans-serif;
+            color: var(--ink-900);
+            background:
+                radial-gradient(1200px 500px at -10% -10%, rgba(15, 116, 255, 0.16), transparent 70%),
+                radial-gradient(700px 400px at 110% 20%, rgba(14, 165, 233, 0.14), transparent 70%),
+                linear-gradient(180deg, #f8fbff 0%, #f2f7ff 100%);
+        }
+
+        * {
+            border-radius: 5px !important;
+            box-shadow: none !important;
+        }
+
+        *::before,
+        *::after {
+            box-shadow: none !important;
+        }
+
+        #create-bg-canvas {
+            position: fixed;
+            inset: 0;
             width: 100%;
-            font-weight: 500;
-            font-size: 13px;
-            outline: none;
-            background: #ffffff;
-            color: #0f172a;
-        }
-        .input-field:focus {
-            background-color: #ffffff;
-            border-color: #93c5fd;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.45;
         }
 
-        .type-btn {
-            border: 1px solid #e2e8f0;
-            border-radius: 5px;
-            background: #ffffff;
-            padding: 15px;
-            flex: 1;
-            text-align: center;
+        .theme-dark body {
+            background:
+                radial-gradient(900px 500px at -10% -10%, rgba(37, 99, 235, 0.18), transparent 70%),
+                radial-gradient(700px 420px at 100% 20%, rgba(6, 182, 212, 0.16), transparent 72%),
+                #0a1525 !important;
+            color: #e8f0ff;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.86);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .theme-dark .glass {
+            background: rgba(17, 29, 48, 0.82);
+            border-color: rgba(70, 92, 122, 0.35);
+        }
+
+        .rounded-custom { border-radius: 10px !important; }
+
+        .pill-tab {
+            border: 1px solid var(--line-soft);
+            background: rgba(255, 255, 255, 0.8);
+            color: var(--ink-700);
+            font-size: 12px;
             font-weight: 700;
-            font-size: 11px;
-            transition: all 0.3s;
-        }
-        .type-btn.active {
-            background: #eff6ff;
-            color: #1d4ed8;
-            border-color: #bfdbfe;
-        }
-
-        .create-toggle-btn {
-            border: 1px solid #cbd5e1;
-            background: #ffffff;
-            color: #334155;
-            border-radius: 5px;
-            padding: 12px 20px;
-            font-size: 11px;
-            font-weight: 800;
-            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            padding: 9px 16px;
+            border-radius: 999px;
             transition: all 0.2s ease;
         }
 
-        .create-toggle-btn.active-view {
-            background: #1d4ed8;
+        .pill-tab.active {
             color: #ffffff;
-            border-color: #1d4ed8;
+            background: linear-gradient(120deg, var(--brand-600), #38bdf8);
+            border-color: transparent;
         }
 
-        .preview-box {
-            border: 2px dashed #e2e8f0;
+        .composer-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 1rem;
+        }
+
+        @media (min-width: 1280px) {
+            .composer-grid {
+                grid-template-columns: minmax(0, 1fr) 380px;
+            }
+        }
+
+        .editor-panel {
+            border: 1px solid var(--line-soft);
+            background: var(--surface-1);
             border-radius: 5px;
-            aspect-ratio: 16/9;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #f8fafc;
+        }
+
+        .theme-dark .editor-panel {
+            background: #111b30;
+            border-color: #243752;
+        }
+
+        .editor-input,
+        .editor-select,
+        .editor-textarea {
+            width: 100%;
+            border: 1px solid #d3deea;
+            border-radius: 12px;
+            background: #f9fbff;
+            color: var(--ink-900);
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .editor-input:focus,
+        .editor-select:focus,
+        .editor-textarea:focus {
+            border-color: #60a5fa;
+        }
+
+        .theme-dark .editor-input,
+        .theme-dark .editor-select,
+        .theme-dark .editor-textarea {
+            background: #15243b;
+            border-color: #2b4263;
+            color: #eaf2ff;
+        }
+
+        .editor-textarea {
+            min-height: 180px;
+            resize: vertical;
+            padding: 16px;
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        .media-dropzone {
+            position: relative;
+            overflow: hidden;
+            border-radius: 18px;
+            border: 2px dashed #bfd3ea;
+            min-height: 220px;
+            background:
+                linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(245, 250, 255, 0.95)),
+                radial-gradient(200px 120px at 10% 0%, rgba(14, 165, 233, 0.16), transparent 65%);
+            transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .media-dropzone.dragging {
+            border-color: var(--brand-600);
+            transform: scale(1.01);
+        }
+
+        .media-dropzone.has-file {
+            border-style: solid;
+            border-color: #9bc0ed;
+        }
+
+        .theme-dark .media-dropzone {
+            background: linear-gradient(155deg, rgba(20, 37, 58, 0.95), rgba(16, 29, 46, 0.95));
+            border-color: #3a5578;
+        }
+
+        .type-pill {
+            border: 1px solid #c4d8ef;
+            color: var(--ink-700);
+            background: #ffffff;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+            padding: 8px 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .type-pill.active {
+            color: white;
+            border-color: transparent;
+            background: linear-gradient(120deg, #0f74ff, #22d3ee);
+        }
+
+        .theme-dark .type-pill {
+            background: #182943;
+            color: #9fbbdb;
+            border-color: #325075;
+        }
+
+        .publish-btn {
+            border-radius: 5px;
+            background: linear-gradient(120deg, #0f74ff, #10b2f4);
+            color: white;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+        }
+
+        .publish-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .publish-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .preview-card {
+            border: 1px solid #d2deed;
+            border-radius: 5px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .theme-dark .preview-card {
+            border-color: #2a4467;
+            background: #101d30;
+        }
+
+        .kpi {
+            border-radius: 5px;
+            border: 1px solid #d6e3f2;
+            padding: 12px;
+            background: #f8fbff;
+        }
+
+        .theme-dark .kpi {
+            border-color: #2b4363;
+            background: #13243a;
+        }
+
+        .gallery-card {
+            border: 1px solid #d3e1f0;
+            border-radius: 5px;
+            overflow: hidden;
+            background: white;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .gallery-card:hover {
+            transform: translateY(-2px);
         }
 
         .gallery-menu {
             position: absolute;
+            top: 36px;
             right: 8px;
-            top: 0px;
-            width: 170px;
+            min-width: 150px;
+            border: 1px solid #cfdcec;
             background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 5px;
-            padding: 8px;
-            z-index: 20;
+            z-index: 15;
         }
 
-        .fullscreen-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
+        .theme-dark .gallery-menu {
+            border-color: #355173;
+            background: #0f1c30;
+        }
+
+        .gallery-menu.hidden {
+            display: none;
+        }
+
+        .gallery-menu button {
+            display: block;
             width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s, visibility 0.3s;
+            text-align: left;
+            padding: 8px 10px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #27415b;
         }
 
-        .fullscreen-modal.active {
-            opacity: 1;
-            visibility: visible;
+        .gallery-menu button:hover {
+            background: #edf4ff;
         }
 
-        .fullscreen-modal-content {
-            position: relative;
-            width: 90%;
-            height: 90%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .theme-dark .gallery-menu button {
+            color: #c7ddf8;
         }
 
-        .fullscreen-modal-media {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
+        .theme-dark .gallery-menu button:hover {
+            background: #162844;
         }
 
-        .fullscreen-close-btn {
-            position: absolute;
-            top: 20px;
-            right: 30px;
-            color: #ffffff;
-            font-size: 40px;
-            font-weight: bold;
-            cursor: pointer;
-            z-index: 1001;
-            background: rgba(0, 0, 0, 0.5);
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.2s;
+        .gallery-menu button.gallery-action-danger {
+            color: #dc2626;
         }
 
-        .fullscreen-close-btn:hover {
-            background: rgba(0, 0, 0, 0.8);
+        .theme-dark .gallery-menu button.gallery-action-danger {
+            color: #f87171;
         }
 
-        .fullscreen-title {
-            position: absolute;
-            bottom: 20px;
-            left: 30px;
-            color: #ffffff;
-            font-size: 14px;
-            font-weight: 600;
-            z-index: 1001;
-            max-width: 70%;
-            text-overflow: ellipsis;
-            overflow: hidden;
-            white-space: nowrap;
+        .theme-dark .gallery-card {
+            background: #101d30;
+            border-color: #2d4668;
         }
+
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        .text-muted { color: var(--ink-500); }
+        .text-main { color: var(--ink-900); }
     </style>
 </head>
-<body class="flex min-h-screen bg-[#f0f2f5]">
-
-    <!-- Full-screen Media Viewer Modal -->
-    <div id="fullscreenModal" class="fullscreen-modal">
-        <div class="fullscreen-modal-content">
-            <div id="fullscreenMediaContainer"></div>
-            <div class="fullscreen-close-btn" onclick="closeFullscreenViewer()">×</div>
-            <div class="fullscreen-title" id="fullscreenTitle"></div>
-        </div>
-    </div>
-
+<body class="min-h-screen overflow-hidden">
+    <canvas id="create-bg-canvas" aria-hidden="true"></canvas>
+    <x-dashboard-header />
     <x-dashboard-sidebar />
-        <x-dashboard-header />
 
-    <div class="flex-1 flex flex-col h-screen overflow-hidden">
-
-        <div class="main-content flex flex-col h-full overflow-hidden">
-            <div class=" bg-white px-6 py-6">
-                <div class="flex justify-end">
-                    <div class="flex gap-2 w-full md:w-auto">
-                        <button onclick="switchView('create', this)" class="create-toggle-btn">Create New</button>
-                        <button onclick="switchView('history', this)" class="create-toggle-btn active-view">Your Gallery</button>
+    <div class="pt-16 h-[100dvh] overflow-hidden relative z-10">
+        <main class="h-full overflow-y-auto scrollbar-hide">
+            <div class="mx-auto max-w-7xl px-4 md:px-8 py-6 md:py-8">
+                <section class="glass rounded-[22px] px-5 md:px-7 py-5 md:py-6 mb-6">
+                    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                        <div>
+                            <p class="text-[11px] font-bold tracking-[0.24em] uppercase text-blue-600">Creator Studio</p>
+                            <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight mt-2 text-main">Build a Post That Feels Premium</h1>
+                            <p class="text-sm md:text-[15px] text-muted mt-2 max-w-2xl">Compose, style, and preview your content in one focused workflow. Fast publishing with a cleaner production-style control panel.</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="switchTab('create')" id="tab-create" class="pill-tab active">Compose</button>
+                            <button onclick="switchTab('gallery')" id="tab-gallery" class="pill-tab">Library</button>
+                        </div>
                     </div>
-                </div>
+                </section>
+
+                <section id="section-create" class="composer-grid">
+                    <div class="space-y-4 md:space-y-5 min-w-0">
+                        <article class="editor-panel p-4 md:p-6">
+                            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-5">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-400 flex items-center justify-center text-white font-black text-sm">
+                                        {{ strtoupper(substr(auth()->user()->first_name ?? 'U', 0, 1)) }}
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-extrabold text-main truncate">{{ auth()->user()->display_name ?? 'User' }}</p>
+                                        <p class="text-[11px] text-muted">Post creation session is active</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <label class="text-[11px] font-bold uppercase tracking-[0.18em] text-muted">Visibility</label>
+                                    <select id="post-privacy" class="editor-select px-3 py-2 text-xs font-bold">
+                                        <option value="public">Public</option>
+                                        <option value="private">Private</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                                <div>
+                                    <label class="text-[11px] font-bold uppercase tracking-[0.18em] text-muted block mb-2">Title</label>
+                                    <input id="post-title" type="text" placeholder="Give this content a clear, strong title" class="editor-input px-3 py-2.5 text-sm font-semibold">
+                                </div>
+                                <div>
+                                    <label class="text-[11px] font-bold uppercase tracking-[0.18em] text-muted block mb-2">Tags</label>
+                                    <input id="post-tags" type="text" placeholder="design, workflow, update" class="editor-input px-3 py-2.5 text-sm font-semibold">
+                                </div>
+                            </div>
+
+                            <div class="mb-2 mt-4 flex items-center justify-between">
+                                <label class="text-[11px] font-bold uppercase tracking-[0.18em] text-muted">Story</label>
+                                <p id="desc-counter" class="text-[11px] font-semibold text-slate-500">0 chars</p>
+                            </div>
+                            <textarea id="post-description" class="editor-textarea" placeholder="Write a compelling story for your audience. Keep it clear, useful, and intentional."></textarea>
+
+                            <div id="media-dropzone" class="media-dropzone mt-4 cursor-pointer">
+                                <input type="file" id="post-media" class="hidden" accept="image/*,video/*">
+                                <div id="dropzone-empty" class="absolute inset-0 px-6 py-6 flex flex-col items-center justify-center text-center text-slate-500">
+                                    <svg class="w-11 h-11 mb-3 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.587-1.587a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <p class="font-extrabold text-sm">Drop image/video here</p>
+                                    <p class="text-xs mt-1">or click to upload from your device</p>
+                                </div>
+                                <div id="dropzone-preview" class="hidden absolute inset-0">
+                                    <img id="preview-img" class="hidden w-full h-full object-cover" alt="Media preview">
+                                    <video id="preview-video" class="hidden w-full h-full object-cover" controls></video>
+                                    <button onclick="clearMedia(event)" class="absolute top-3 right-3 bg-black/60 text-white p-2 rounded-full hover:bg-black/75 transition-colors" aria-label="Remove media">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="mt-5">
+                                <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-muted mb-2">Format</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <button type="button" onclick="setPostType('post')" class="type-pill active" data-type="post">Post</button>
+                                    <button type="button" onclick="setPostType('reel')" class="type-pill" data-type="reel">Reel</button>
+                                    <button type="button" onclick="setPostType('live')" class="type-pill" data-type="live">Live</button>
+                                </div>
+                            </div>
+
+                            <div class="mt-6 flex gap-3">
+                                <button id="btn-publish" onclick="handlePublish()" class="publish-btn flex-1 py-3.5 text-sm flex items-center justify-center gap-2">
+                                    <span>Publish to Feed</span>
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-7-7l7 7-7 7"></path></svg>
+                                </button>
+                            </div>
+                        </article>
+                    </div>
+
+                    <aside class="space-y-4">
+                        <article class="preview-card">
+                            <div class="px-4 py-3 border-b border-slate-100 dark:border-slate-700/60 flex items-center justify-between">
+                                <p class="text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-500">Live Preview</p>
+                                <span id="preview-type-badge" class="px-2 py-1 rounded-full text-[10px] font-black uppercase bg-blue-50 text-blue-600">Post</span>
+                            </div>
+                            <div class="p-4 flex items-start gap-3">
+                                <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-600 to-cyan-400 text-white text-xs font-black flex items-center justify-center">
+                                    {{ strtoupper(substr(auth()->user()->first_name ?? 'U', 0, 1)) }}
+                                </div>
+                                <div class="min-w-0">
+                                    <p id="preview-author" class="text-sm font-extrabold truncate text-main">{{ auth()->user()->display_name ?? 'User' }}</p>
+                                    <p class="text-[11px] text-slate-500">Just now • <span id="preview-privacy-label">Public</span></p>
+                                </div>
+                            </div>
+                            <div class="px-4 pb-3">
+                                <p id="preview-text" class="text-sm text-slate-600 leading-6 italic">Start typing to see preview...</p>
+                                <div id="preview-tag-list" class="flex flex-wrap gap-1.5 mt-2"></div>
+                            </div>
+                            <div id="preview-media-box" class="mx-4 mb-4 rounded-xl overflow-hidden h-44 bg-slate-100 dark:bg-slate-800 flex items-center justify-center relative">
+                                <img id="preview-media-img" class="hidden w-full h-full object-cover" alt="Live preview media">
+                                <div id="preview-media-placeholder" class="text-center text-slate-400">
+                                    <svg class="w-8 h-8 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.587-1.587a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    <p class="text-[11px] font-bold">Media area</p>
+                                </div>
+                            </div>
+                        </article>
+
+                        <article class="editor-panel p-4">
+                            <h3 class="text-sm font-extrabold text-main">Quality Checklist</h3>
+                            <div class="grid grid-cols-1 gap-2 mt-3">
+                                <div class="kpi">
+                                    <p class="text-[11px] uppercase font-extrabold tracking-[0.16em] text-slate-500">Title Strength</p>
+                                    <p id="kpi-title" class="text-sm font-bold mt-1 text-slate-700">Add a clear title</p>
+                                </div>
+                                <div class="kpi">
+                                    <p class="text-[11px] uppercase font-extrabold tracking-[0.16em] text-slate-500">Body Readiness</p>
+                                    <p id="kpi-description" class="text-sm font-bold mt-1 text-slate-700">Start writing your post</p>
+                                </div>
+                                <div class="kpi">
+                                    <p class="text-[11px] uppercase font-extrabold tracking-[0.16em] text-slate-500">Media Status</p>
+                                    <p id="kpi-media" class="text-sm font-bold mt-1 text-slate-700">No media selected</p>
+                                </div>
+                            </div>
+                        </article>
+                    </aside>
+                </section>
+
+                <section id="section-gallery" class="hidden">
+                    <div class="editor-panel p-4 md:p-5">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+                            <div>
+                                <h3 class="text-lg font-extrabold text-main">Your Published Library</h3>
+                                <p class="text-sm text-muted">Recent content snapshots from your feed.</p>
+                            </div>
+                            <button onclick="loadGallery()" class="pill-tab">Refresh</button>
+                        </div>
+                        <div id="gallery-grid" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
+                            <div class="col-span-full py-16 text-center text-slate-500 font-bold">Fetching your creative history...</div>
+                        </div>
+                    </div>
+                </section>
             </div>
-
-            <main class="flex-1 overflow-y-auto p-6 md:p-10 bg-[#f8fafc]">
-                
-                <div id="createSection" class="hidden max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10">
-                    
-                    <div class="space-y-6 bg-white border border-slate-200 rounded-custom p-5 md:p-6">
-                        <div>
-                            <label class="text-xs font-bold mb-3 block text-blue-600">Step 1: Select Type</label>
-                            <div class="grid grid-cols-3 gap-2">
-                                    <button type="button" onclick="setContentType('post', this)" class="type-btn active">Post</button>
-                                    <button type="button" onclick="setContentType('reel', this)" class="type-btn">Reel</button>
-                                    <button type="button" onclick="setContentType('live', this)" class="type-btn">Live</button>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="text-xs font-bold mb-2 block text-slate-600">Title</label>
-                                    <input id="contentTitle" type="text" placeholder="Enter title..." class="input-field">
-                            </div>
-                            <div>
-                                <label class="text-xs font-bold mb-2 block text-slate-600">Subtitle</label>
-                                    <input id="contentSubtitle" type="text" placeholder="Enter subtitle..." class="input-field">
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="text-xs font-bold mb-2 block text-slate-600">Description</label>
-                                <textarea id="contentDescription" rows="4" placeholder="Write something..." class="input-field resize-none"></textarea>
-                        </div>
-
-                        <div>
-                            <label class="text-xs font-bold mb-2 block text-slate-600">Tags (Comma separated)</label>
-                                <input id="contentTags" type="text" placeholder="web, design, connect..." class="input-field">
-                        </div>
-
-                        <div>
-                            <label class="text-xs font-bold mb-3 block text-slate-600">Visibility</label>
-                            <div class="flex gap-6">
-                                <label class="flex items-center gap-2 cursor-pointer font-semibold text-sm text-slate-700">
-                                        <input type="radio" name="privacy" value="public" checked class="w-4 h-4 accent-blue-600"> Public
-                                </label>
-                                <label class="flex items-center gap-2 cursor-pointer font-semibold text-sm text-slate-700">
-                                    <input type="radio" name="privacy" value="private" class="w-4 h-4 accent-blue-600"> Private
-                                </label>
-                            </div>
-                        </div>
-
-                            <button id="publishContentBtn" type="button" class="w-full bg-blue-600 text-white py-3.5 rounded-custom font-semibold text-sm hover:bg-blue-700 transition-all">Publish Content</button>
-                            <p id="createStatus" class="text-xs font-semibold text-slate-500"></p>
-                    </div>
-
-                    <div class="space-y-6 bg-white border border-slate-200 rounded-custom p-5 md:p-6">
-                        <label class="text-xs font-bold block text-blue-600">Step 2: Upload Media</label>
-                        <input id="mediaInput" type="file" class="hidden" accept="image/*,video/*">
-                        <div id="uploadZone" class="preview-box group cursor-pointer hover:border-blue-400 transition-all">
-                            <div class="text-center">
-                                <p class="text-sm font-bold text-slate-700">Click to Upload <span id="mediaTypeLabel">Image/Video</span></p>
-                                <p class="text-xs text-slate-400 mt-2 font-semibold">Max Size: 1GB</p>
-                            </div>
-                        </div>
-                        
-                        <div id="uploadProgressContainer" class="hidden space-y-2">
-                            <div class="flex items-center justify-between">
-                                <p class="text-xs font-semibold text-slate-600">Uploading...</p>
-                                <span id="uploadPercentage" class="text-xs font-bold text-blue-600">0%</span>
-                            </div>
-                            <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
-                                <div id="uploadProgressBar" class="bg-blue-600 h-full w-0 transition-all duration-300 ease-out" style="width: 0%"></div>
-                            </div>
-                            <p id="uploadFileSize" class="text-xs text-slate-500 font-semibold"></p>
-                        </div>
-                        
-                        <div id="mediaRequirement" class="p-4 bg-amber-50 border border-amber-200 rounded-custom">
-                            <p class="text-xs font-semibold text-amber-700">Requirement: Post supports Image and Video. Reels are Video only. Videos up to 1 hour supported.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="historySection" class="max-w-7xl mx-auto">
-                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="galleryGrid">
-                        </div>
-                </div>
-
-            </main>
-        </div>
+        </main>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
         const CSRF_TOKEN = '{{ csrf_token() }}';
-        let currentType = 'post';
-        let historyData = [];
+        let currentPostType = 'post';
+        let historyItems = [];
 
-        const uploadZone = document.getElementById('uploadZone');
-        const mediaInput = document.getElementById('mediaInput');
-        const contentTitle = document.getElementById('contentTitle');
-        const contentSubtitle = document.getElementById('contentSubtitle');
-        const contentDescription = document.getElementById('contentDescription');
-        const contentTags = document.getElementById('contentTags');
-        const publishContentBtn = document.getElementById('publishContentBtn');
-        const createStatus = document.getElementById('createStatus');
+        const userLabel = '{{ auth()->user()->display_name ?? "User" }}';
 
-        function openFullscreenViewer(mediaUrl, mediaType, title) {
-            const modal = document.getElementById('fullscreenModal');
-            const container = document.getElementById('fullscreenMediaContainer');
-            const titleEl = document.getElementById('fullscreenTitle');
-            
-            container.innerHTML = '';
-            
-            if (mediaType === 'video') {
-                const video = document.createElement('video');
-                video.src = mediaUrl;
-                video.controls = true;
-                video.autoplay = true;
-                video.classList.add('fullscreen-modal-media');
-                container.appendChild(video);
+        const descInput = document.getElementById('post-description');
+        const titleInput = document.getElementById('post-title');
+        const tagsInput = document.getElementById('post-tags');
+        const privacySelect = document.getElementById('post-privacy');
+        const mediaInput = document.getElementById('post-media');
+        const dropzone = document.getElementById('media-dropzone');
+
+        const previewText = document.getElementById('preview-text');
+        const previewTypeBadge = document.getElementById('preview-type-badge');
+        const previewPrivacyLabel = document.getElementById('preview-privacy-label');
+        const previewTags = document.getElementById('preview-tag-list');
+        const previewMediaImg = document.getElementById('preview-media-img');
+        const previewMediaPlaceholder = document.getElementById('preview-media-placeholder');
+
+        const counter = document.getElementById('desc-counter');
+        const kpiTitle = document.getElementById('kpi-title');
+        const kpiDescription = document.getElementById('kpi-description');
+        const kpiMedia = document.getElementById('kpi-media');
+
+        function statusClass(text, good = false) {
+            return `<span class="${good ? 'text-emerald-600' : 'text-amber-600'}">${text}</span>`;
+        }
+
+        function updatePreviewText() {
+            const val = (descInput.value || '').trim();
+            previewText.textContent = val || 'Start typing to see preview...';
+            previewText.classList.toggle('italic', !val);
+            counter.textContent = `${val.length} chars`;
+
+            if (!val.length) {
+                kpiDescription.innerHTML = statusClass('Start writing your post');
+            } else if (val.length < 60) {
+                kpiDescription.innerHTML = statusClass('Too short, add detail');
             } else {
-                const img = document.createElement('img');
-                img.src = mediaUrl;
-                img.alt = title;
-                img.classList.add('fullscreen-modal-media');
-                container.appendChild(img);
+                kpiDescription.innerHTML = '<span class="text-emerald-600">Looks good for publish</span>';
             }
-            
-            titleEl.textContent = title;
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
         }
 
-        function closeFullscreenViewer() {
-            const modal = document.getElementById('fullscreenModal');
-            const container = document.getElementById('fullscreenMediaContainer');
-            
-            // Stop video if playing
-            const video = container.querySelector('video');
-            if (video) {
-                video.pause();
-                video.src = '';
+        function updatePreviewTitle() {
+            const val = (titleInput.value || '').trim();
+            document.getElementById('preview-author').textContent = val || userLabel;
+
+            if (!val.length) {
+                kpiTitle.innerHTML = statusClass('Add a clear title');
+            } else if (val.length < 8) {
+                kpiTitle.innerHTML = statusClass('Title is weak, expand it');
+            } else {
+                kpiTitle.innerHTML = '<span class="text-emerald-600">Strong title</span>';
             }
-            
-            modal.classList.remove('active');
-            document.body.style.overflow = 'auto';
         }
 
-        function setStatus(message, tone = 'muted') {
-            if (!createStatus) return;
-            const colors = {
-                muted: 'text-slate-500',
-                ok: 'text-emerald-600',
-                warn: 'text-amber-600',
-                danger: 'text-red-600'
-            };
+        function updatePreviewTags() {
+            const tags = (tagsInput.value || '')
+                .split(',')
+                .map((t) => t.trim())
+                .filter((t) => t.length);
 
-            createStatus.textContent = message;
-            createStatus.className = 'text-xs font-semibold ' + (colors[tone] || colors.muted);
+            previewTags.innerHTML = tags
+                .slice(0, 8)
+                .map((tag) => `<span class="px-2 py-1 rounded-full bg-blue-50 text-[10px] font-bold text-blue-600">#${tag}</span>`)
+                .join('');
         }
 
-        function openMediaPicker() {
-            if (!mediaInput) return;
-            mediaInput.value = '';
-            mediaInput.click();
+        function updatePrivacy() {
+            previewPrivacyLabel.textContent = privacySelect.value === 'public' ? 'Public' : 'Private';
         }
 
-        function renderMediaPreview(file) {
-            if (!uploadZone || !file) return;
-
+        function applyMediaPreview(file, result) {
             const isVideo = file.type.startsWith('video/');
-            const isAllowed = currentType === 'reel' || currentType === 'live' ? isVideo : true;
+            const pImg = document.getElementById('preview-img');
+            const pVid = document.getElementById('preview-video');
 
-            if (!isAllowed) {
-                setStatus('This content type only accepts video media.', 'warn');
-                mediaInput.value = '';
-                return;
-            }
+            document.getElementById('dropzone-empty').classList.add('hidden');
+            document.getElementById('dropzone-preview').classList.remove('hidden');
+            dropzone.classList.add('has-file');
 
-            const objectUrl = URL.createObjectURL(file);
-            uploadZone.dataset.previewUrl = objectUrl;
-            uploadZone.dataset.previewType = isVideo ? 'video' : 'image';
+            if (isVideo) {
+                pImg.classList.add('hidden');
+                pVid.classList.remove('hidden');
+                pVid.src = result;
 
-            uploadZone.innerHTML = isVideo
-                ? `<video controls class="w-full h-full object-cover rounded-custom bg-black"><source src="${objectUrl}" type="${file.type}"></video>`
-                : `<img src="${objectUrl}" alt="Upload preview" class="w-full h-full object-cover rounded-custom">`;
+                previewMediaImg.classList.add('hidden');
+                previewMediaPlaceholder.classList.remove('hidden');
+                previewMediaPlaceholder.innerHTML = '<svg class="w-8 h-8 mx-auto mb-1 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"></path></svg><p class="text-[11px] font-bold text-blue-500">Video selected</p>';
+                kpiMedia.innerHTML = '<span class="text-emerald-600">Video attached</span>';
+            } else {
+                pVid.classList.add('hidden');
+                pImg.classList.remove('hidden');
+                pImg.src = result;
 
-            const mediaEl = uploadZone.querySelector(isVideo ? 'video' : 'img');
-            mediaEl?.addEventListener('load', () => URL.revokeObjectURL(objectUrl), { once: true });
-            mediaEl?.addEventListener('loadeddata', () => URL.revokeObjectURL(objectUrl), { once: true });
-            setStatus('Media preview ready.', 'ok');
-        }
-
-        function getVisibility() {
-            return document.querySelector('input[name="privacy"]:checked')?.value || 'public';
-        }
-
-        function getPlaceholderMedia(type) {
-            if (type === 'reel') return 'https://picsum.photos/300/500?random=' + Date.now();
-            if (type === 'live') return 'https://picsum.photos/400/400?random=' + Date.now();
-            return 'https://picsum.photos/400/300?random=' + Date.now();
-        }
-
-        function normalizeItem(item) {
-            return {
-                id: item.id,
-                type: item.type,
-                title: item.title,
-                img: item.mediaUrl || getPlaceholderMedia(item.type),
-                mediaType: item.mediaType || (item.mediaUrl && item.mediaUrl.match(/\.(mp4|webm|mov)$/i) ? 'video' : 'image'),
-                visibility: item.visibility,
-                publishedAt: item.publishedAt || 'Just now'
-            };
-        }
-
-        async function loadHistory() {
-            try {
-                const response = await fetch('/api/content-items', { headers: { Accept: 'application/json' } });
-                if (!response.ok) throw new Error('Failed to load content');
-
-                const data = await response.json();
-                historyData = (data.items || []).map(normalizeItem);
-                renderHistory();
-                setStatus(historyData.length ? 'Loaded saved content from DB.' : 'No content yet. Publish your first item.', 'muted');
-            } catch (error) {
-                setStatus('Could not load content from server.', 'danger');
+                previewMediaImg.classList.remove('hidden');
+                previewMediaImg.src = result;
+                previewMediaPlaceholder.classList.add('hidden');
+                kpiMedia.innerHTML = '<span class="text-emerald-600">Image attached</span>';
             }
         }
 
-        async function publishContent() {
-            const title = contentTitle?.value.trim();
+        function clearMedia(event) {
+            if (event && typeof event.stopPropagation === 'function') event.stopPropagation();
+
+            mediaInput.value = '';
+            document.getElementById('dropzone-empty').classList.remove('hidden');
+            document.getElementById('dropzone-preview').classList.add('hidden');
+            dropzone.classList.remove('has-file', 'dragging');
+
+            const pImg = document.getElementById('preview-img');
+            const pVid = document.getElementById('preview-video');
+            pImg.src = '';
+            pVid.src = '';
+            pImg.classList.add('hidden');
+            pVid.classList.add('hidden');
+
+            previewMediaImg.src = '';
+            previewMediaImg.classList.add('hidden');
+            previewMediaPlaceholder.classList.remove('hidden');
+            previewMediaPlaceholder.innerHTML = '<svg class="w-8 h-8 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.587-1.587a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg><p class="text-[11px] font-bold">Media area</p>';
+            kpiMedia.innerHTML = statusClass('No media selected');
+        }
+
+        function setPostType(type) {
+            currentPostType = type;
+            document.querySelectorAll('.type-pill').forEach((pill) => {
+                pill.classList.toggle('active', pill.dataset.type === type);
+            });
+            previewTypeBadge.textContent = type.charAt(0).toUpperCase() + type.slice(1);
+
+            if (window.anime) {
+                anime({
+                    targets: '#preview-type-badge',
+                    scale: [1, 1.08, 1],
+                    duration: 320,
+                    easing: 'easeOutQuad'
+                });
+            }
+        }
+
+        function switchTab(tab) {
+            const create = document.getElementById('section-create');
+            const gallery = document.getElementById('section-gallery');
+            const btnCreate = document.getElementById('tab-create');
+            const btnGallery = document.getElementById('tab-gallery');
+
+            if (tab === 'create') {
+                create.classList.remove('hidden');
+                gallery.classList.add('hidden');
+                btnCreate.classList.add('active');
+                btnGallery.classList.remove('active');
+            } else {
+                create.classList.add('hidden');
+                gallery.classList.remove('hidden');
+                btnCreate.classList.remove('active');
+                btnGallery.classList.add('active');
+                loadGallery();
+            }
+        }
+
+        async function handlePublish() {
+            const btn = document.getElementById('btn-publish');
+            const title = titleInput.value.trim();
+            const description = descInput.value.trim();
+
             if (!title) {
-                setStatus('Title is required.', 'warn');
+                alert('Please add a title for your content.');
                 return;
             }
 
             const formData = new FormData();
-            formData.append('content_type', currentType);
+            formData.append('content_type', currentPostType);
             formData.append('title', title);
-            formData.append('subtitle', contentSubtitle?.value.trim() || '');
-            formData.append('description', contentDescription?.value.trim() || '');
-            formData.append('tags', contentTags?.value.trim() || '');
-            formData.append('visibility', getVisibility());
+            formData.append('description', description);
+            formData.append('tags', tagsInput.value.trim());
+            formData.append('visibility', privacySelect.value);
 
-            if (mediaInput?.files?.[0]) {
+            if (mediaInput.files[0]) {
                 formData.append('media', mediaInput.files[0]);
             }
 
-            publishContentBtn.disabled = true;
-            publishContentBtn.textContent = 'Publishing...';
-            
-            // Show progress container if file exists
-            const progressContainer = document.getElementById('uploadProgressContainer');
-            const progressBar = document.getElementById('uploadProgressBar');
-            const progressPercentage = document.getElementById('uploadPercentage');
-            const fileSize = document.getElementById('uploadFileSize');
-            
-            if (mediaInput?.files?.[0]) {
-                progressContainer.classList.remove('hidden');
-                const fileSizeMB = (mediaInput.files[0].size / (1024 * 1024)).toFixed(2);
-                fileSize.textContent = `${fileSizeMB}MB`;
-                progressBar.style.width = '0%';
-                progressPercentage.textContent = '0%';
-            }
+            btn.disabled = true;
+            btn.innerHTML = '<svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Publishing...</span>';
 
-            return new Promise((resolve) => {
-                const xhr = new XMLHttpRequest();
-                
-                // Track upload progress
-                xhr.upload.addEventListener('progress', (e) => {
-                    if (e.lengthComputable) {
-                        const percentComplete = Math.round((e.loaded / e.total) * 100);
-                        progressBar.style.width = percentComplete + '%';
-                        progressPercentage.textContent = percentComplete + '%';
-                        setStatus(`Uploading... ${percentComplete}%`, 'muted');
-                    }
+            try {
+                const response = await fetch('/api/content-items', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': CSRF_TOKEN,
+                        Accept: 'application/json'
+                    },
+                    body: formData
                 });
-                
-                xhr.addEventListener('load', () => {
-                    if (xhr.status >= 200 && xhr.status < 300) {
-                        try {
-                            const data = JSON.parse(xhr.responseText);
-                            historyData.unshift(normalizeItem(data.item));
-                            renderHistory();
-                            switchView('history', document.querySelector('.create-toggle-btn.active-view') || document.querySelector('.create-toggle-btn'));
-                            contentTitle.value = '';
-                            contentSubtitle.value = '';
-                            contentDescription.value = '';
-                            contentTags.value = '';
-                            mediaInput.value = '';
-                            uploadZone.innerHTML = `
-                                <div class="text-center">
-                                    <p class="text-sm font-bold text-slate-700">Click to Upload <span id="mediaTypeLabel">Image/Video</span></p>
-                                    <p class="text-xs text-slate-400 mt-2 font-semibold">Max Size: 1GB</p>
-                                </div>
-                            `;
-                            progressContainer.classList.add('hidden');
-                            setStatus('Content published and stored in DB.', 'ok');
-                        } catch (e) {
-                            setStatus('Content uploaded but response parsing failed.', 'warn');
-                        }
-                    } else {
-                        try {
-                            const errorData = JSON.parse(xhr.responseText);
-                            setStatus(errorData?.message || 'Upload failed with status ' + xhr.status, 'danger');
-                        } catch {
-                            setStatus('Upload failed: ' + xhr.statusText, 'danger');
-                        }
-                    }
-                    publishContentBtn.disabled = false;
-                    publishContentBtn.textContent = 'Publish Content';
-                    resolve();
-                });
-                
-                xhr.addEventListener('error', () => {
-                    setStatus('Network error during upload.', 'danger');
-                    publishContentBtn.disabled = false;
-                    publishContentBtn.textContent = 'Publish Content';
-                    progressContainer.classList.add('hidden');
-                    resolve();
-                });
-                
-                xhr.addEventListener('abort', () => {
-                    setStatus('Upload cancelled.', 'warn');
-                    publishContentBtn.disabled = false;
-                    publishContentBtn.textContent = 'Publish Content';
-                    progressContainer.classList.add('hidden');
-                    resolve();
-                });
-                
-                xhr.open('POST', '/api/content-items');
-                xhr.setRequestHeader('X-CSRF-TOKEN', CSRF_TOKEN);
-                xhr.setRequestHeader('Accept', 'application/json');
-                xhr.send(formData);
-            });
-        }
 
-        function setContentType(type, btn) {
-            currentType = type;
-            document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-
-            const label = document.getElementById('mediaTypeLabel');
-            const req = document.getElementById('mediaRequirement');
-            if (mediaInput) {
-                mediaInput.accept = type === 'reel' ? 'video/*' : (type === 'live' ? 'video/*' : 'image/*,video/*');
-            }
-
-            if(type === 'reel') {
-                label.innerText = 'Video Only';
-                req.innerHTML = `<p class="text-[10px] font-bold uppercase text-blue-700">Reels: Vertical (9:16) videos recommended.</p>`;
-            } else if(type === 'live') {
-                label.innerText = 'Live Stream';
-                req.innerHTML = `<p class="text-[10px] font-bold uppercase text-red-700">Live: Real-time video streaming.</p>`;
-            } else {
-                label.innerText = 'Image/Video';
-                req.innerHTML = `<p class="text-[10px] font-bold uppercase text-yellow-700">Post: Landscape or Square supports both media types.</p>`;
+                if (response.ok) {
+                    titleInput.value = '';
+                    descInput.value = '';
+                    tagsInput.value = '';
+                    privacySelect.value = 'public';
+                    clearMedia({ stopPropagation: () => {} });
+                    setPostType('post');
+                    updatePreviewTitle();
+                    updatePreviewText();
+                    updatePreviewTags();
+                    updatePrivacy();
+                    switchTab('gallery');
+                } else {
+                    const data = await response.json();
+                    alert(data.message || 'Something went wrong while publishing.');
+                }
+            } catch (error) {
+                alert('Network error. Please try again.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span>Publish to Feed</span><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-7-7l7 7-7 7"></path></svg>';
             }
         }
 
-        function switchView(view, btn) {
-            const create = document.getElementById('createSection');
-            const history = document.getElementById('historySection');
-            document.querySelectorAll('.create-toggle-btn').forEach((b) => b.classList.remove('active-view'));
-            btn.classList.add('active-view');
-            
-            if(view === 'create') {
-                create.classList.remove('hidden');
-                history.classList.add('hidden');
-            } else {
-                create.classList.add('hidden');
-                history.classList.remove('hidden');
-                renderHistory();
-            }
+        function closeGalleryMenus() {
+            document.querySelectorAll('.gallery-menu').forEach((menu) => menu.classList.add('hidden'));
         }
 
         function toggleGalleryMenu(itemId) {
-            event?.stopPropagation();
-            const allMenus = document.querySelectorAll('.gallery-menu');
-            allMenus.forEach((menu) => {
-                if (menu.id !== `menu-${itemId}`) menu.classList.add('hidden');
-            });
+            const menu = document.getElementById(`gallery-menu-${itemId}`);
+            if (!menu) return;
 
-            const target = document.getElementById(`menu-${itemId}`);
-            if (!target) return;
-            target.classList.toggle('hidden');
+            const isHidden = menu.classList.contains('hidden');
+            closeGalleryMenus();
+            if (isHidden) menu.classList.remove('hidden');
         }
 
-        function setGalleryVisibility(itemId, visibility) {
-            event?.stopPropagation();
-            const item = historyData.find((entry) => entry.id === itemId);
-            if (!item) return;
+        async function updateGalleryVisibility(itemId, nextVisibility) {
+            try {
+                const response = await fetch(`/api/content-items/${itemId}/visibility`, {
+                    method: 'PATCH',
+                    headers: {
+                        'X-CSRF-TOKEN': CSRF_TOKEN,
+                        'Content-Type': 'application/json',
+                        Accept: 'application/json'
+                    },
+                    body: JSON.stringify({ visibility: nextVisibility })
+                });
 
-            fetch(`/api/content-items/${itemId}/visibility`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': CSRF_TOKEN,
-                    Accept: 'application/json'
-                },
-                body: JSON.stringify({ visibility })
-            }).then(async (response) => {
-                if (!response.ok) throw new Error('Failed to update visibility');
-                item.visibility = visibility;
-                renderHistory();
-                setStatus('Visibility saved to DB.', 'ok');
-            }).catch(() => {
-                setStatus('Could not update visibility.', 'danger');
-            });
-        }
-
-        function deleteGalleryItem(itemId) {
-            event?.stopPropagation();
-            fetch(`/api/content-items/${itemId}`, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': CSRF_TOKEN,
-                    Accept: 'application/json'
+                if (!response.ok) {
+                    const payload = await response.json().catch(() => ({}));
+                    alert(payload.message || 'Failed to update visibility.');
+                    return;
                 }
-            }).then((response) => {
-                if (!response.ok) throw new Error('Delete failed');
-                historyData = historyData.filter((entry) => entry.id !== itemId);
-                renderHistory();
-                setStatus('Content removed from DB.', 'ok');
-            }).catch(() => {
-                setStatus('Could not delete content.', 'danger');
-            });
+
+                await loadGallery();
+            } catch (error) {
+                alert('Network error while updating visibility.');
+            }
         }
 
-        function renderHistory() {
-            const grid = document.getElementById('galleryGrid');
-            grid.innerHTML = '';
-            if (historyData.length === 0) {
-                grid.innerHTML = `<p class="text-center text-slate-500 col-span-full">No content published yet. Start by creating and publishing your first item!</p>`;
+        async function deleteGalleryItem(itemId) {
+            const ok = window.confirm('Delete this content item? This action cannot be undone.');
+            if (!ok) return;
+
+            try {
+                const response = await fetch(`/api/content-items/${itemId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': CSRF_TOKEN,
+                        Accept: 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    const payload = await response.json().catch(() => ({}));
+                    alert(payload.message || 'Failed to delete content.');
+                    return;
+                }
+
+                historyItems = historyItems.filter((item) => Number(item.id) !== Number(itemId));
+                await loadGallery();
+            } catch (error) {
+                alert('Network error while deleting content.');
+            }
+        }
+
+        async function loadGallery() {
+            const grid = document.getElementById('gallery-grid');
+            try {
+                const response = await fetch('/api/content-items', {
+                    headers: { Accept: 'application/json' }
+                });
+                const data = await response.json();
+                historyItems = data.items || [];
+
+                if (!historyItems.length) {
+                    grid.innerHTML = '<div class="col-span-full py-16 text-center text-slate-500 font-bold">You have not shared anything yet.</div>';
+                    return;
+                }
+
+                grid.innerHTML = historyItems.map((item) => `
+                    <article class="gallery-card group">
+                        <div class="aspect-square bg-slate-100 dark:bg-slate-900 relative">
+                            <button type="button" class="absolute top-2 right-2 w-7 h-7 border border-white/50 bg-white/90 text-slate-700 dark:bg-slate-800/95 dark:border-slate-600 dark:text-slate-100 flex items-center justify-center" data-gallery-menu-toggle="${item.id}" aria-label="Open card menu">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 5h.01M12 12h.01M12 19h.01"></path></svg>
+                            </button>
+                            <div id="gallery-menu-${item.id}" class="gallery-menu hidden">
+                                <button type="button" data-gallery-action="visibility" data-item-id="${item.id}" data-current-visibility="${item.visibility || 'public'}">${(item.visibility || 'public') === 'public' ? 'Make Private' : 'Make Public'}</button>
+                                <button type="button" data-gallery-action="delete" data-item-id="${item.id}" class="gallery-action-danger">Delete</button>
+                            </div>
+                            ${item.mediaUrl ? (
+                                item.mediaUrl.match(/\.(mp4|webm|mov)$/i)
+                                    ? `<video class="w-full h-full object-cover"><source src="${item.mediaUrl}"></video><div class="absolute inset-0 flex items-center justify-center bg-black/25"><svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"></path></svg></div>`
+                                    : `<img src="${item.mediaUrl}" class="w-full h-full object-cover" alt="Gallery media">`
+                            ) : `<div class="w-full h-full flex items-center justify-center text-slate-300"><svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.587-1.587a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>`}
+                            <span class="absolute top-2 left-2 px-2 py-1 rounded-full bg-black/55 text-white text-[9px] font-black uppercase">${item.type || 'post'}</span>
+                            <span class="absolute bottom-2 left-2 px-2 py-1 bg-white/90 dark:bg-slate-800/95 border border-white/60 dark:border-slate-600 text-[9px] font-black uppercase text-slate-700 dark:text-slate-100">${item.visibility || 'public'}</span>
+                        </div>
+                        <div class="p-3">
+                            <h4 class="text-xs font-bold truncate text-main">${item.title || 'Untitled'}</h4>
+                            <p class="text-[10px] text-slate-500 mt-1 uppercase font-black tracking-[0.14em]">${item.publishedAt || 'Published'}</p>
+                        </div>
+                    </article>
+                `).join('');
+
+                gsap.from('#gallery-grid > article', {
+                    opacity: 0,
+                    y: 12,
+                    stagger: 0.04,
+                    duration: 0.3,
+                    ease: 'power2.out'
+                });
+            } catch (error) {
+                grid.innerHTML = '<div class="col-span-full py-16 text-center text-red-500 font-bold">Failed to load gallery.</div>';
+            }
+        }
+
+        dropzone.addEventListener('click', () => mediaInput.click());
+
+        dropzone.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            dropzone.classList.add('dragging');
+        });
+
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('dragging');
+        });
+
+        dropzone.addEventListener('drop', (event) => {
+            event.preventDefault();
+            dropzone.classList.remove('dragging');
+            const file = event.dataTransfer?.files?.[0];
+            if (!file) return;
+
+            mediaInput.files = event.dataTransfer.files;
+            const reader = new FileReader();
+            reader.onload = (e) => applyMediaPreview(file, e.target.result);
+            reader.readAsDataURL(file);
+        });
+
+        mediaInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => applyMediaPreview(file, e.target.result);
+            reader.readAsDataURL(file);
+        });
+
+        document.addEventListener('click', async (event) => {
+            const toggle = event.target.closest('[data-gallery-menu-toggle]');
+            if (toggle) {
+                event.stopPropagation();
+                toggleGalleryMenu(toggle.dataset.galleryMenuToggle);
                 return;
             }
 
-            
-            historyData.forEach(item => {
-                let mediaMarkup = '';
-                let playButtonOverlay = '';
-        
-                if (item.mediaType === 'video') {
-                    // For videos, show a placeholder with play button
-                    mediaMarkup = `<div class="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center"><svg class="w-16 h-16 text-white opacity-80" fill="currentColor" viewBox="0 0 20 20"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"></path></svg></div>`;
-                    playButtonOverlay = `<div class="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-all duration-500"></div>`;
-                } else {
-                    // For images, show actual image
-                    mediaMarkup = `<img src="${item.img}" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" alt="${item.title}">`;
+            const actionBtn = event.target.closest('[data-gallery-action]');
+            if (actionBtn) {
+                event.stopPropagation();
+                const itemId = actionBtn.dataset.itemId;
+                const action = actionBtn.dataset.galleryAction;
+
+                if (action === 'delete') {
+                    await deleteGalleryItem(itemId);
+                    closeGalleryMenus();
+                    return;
                 }
 
-                const card = `
-                    <div class="border border-slate-200 bg-white rounded-custom group overflow-hidden cursor-pointer hover:shadow-lg transition-shadow" onclick="openFullscreenViewer('${item.img}', '${item.mediaType}', '${item.title.replace(/'/g, "\\'")}')">
-                        <div class="relative aspect-[4/5] bg-slate-100 overflow-hidden">
-                            ${mediaMarkup}
-                                            ${playButtonOverlay}
-                            <span class="absolute top-2 left-2 bg-blue-600 text-white text-[10px] font-semibold px-2 py-1 rounded-custom">${item.type}</span>
-                            <span class="absolute top-2 left-[46px] bg-slate-900/80 text-white text-[10px] font-semibold px-2 py-1 rounded-custom">${item.visibility}</span>
-                            <div class="absolute top-2 right-2">
-                                <button onclick="event.stopPropagation(); toggleGalleryMenu(${item.id})" class="w-7 h-7 text-slate-600 hover:text-blue-600">...</button>
-                             <div id="menu-${item.id}" class="gallery-menu hidden absolute right-0 mt-2 w-48 bg-white border border-slate-200 p-3 rounded-5 z-50 shadow-sm">
-    <div class="mb-3">
-        <p class="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">Visibility</p>
-    </div>
+                if (action === 'visibility') {
+                    const current = actionBtn.dataset.currentVisibility === 'private' ? 'private' : 'public';
+                    const next = current === 'public' ? 'private' : 'public';
+                    await updateGalleryVisibility(itemId, next);
+                    closeGalleryMenus();
+                    return;
+                }
+            }
 
-    <div class="relative bg-slate-100 p-1 flex items-center rounded-5 h-9 overflow-hidden">
-        <div id="pill-${item.id}" 
-             class="absolute top-1 bottom-1 w-[47%] bg-white rounded-5 shadow-sm transition-all duration-300 ease-out"
-             style="left: ${item.visibility === 'public' ? '4px' : '49%'}; 
-                    border: 1px solid ${item.visibility === 'public' ? '#e2e8f0' : '#f1f5f9'};">
-        </div>
+            if (!event.target.closest('.gallery-menu')) {
+                closeGalleryMenus();
+            }
+        });
 
-        <button onclick="event.stopPropagation(); setGalleryVisibility(${item.id}, 'public')" 
-                class="relative z-10 flex-1 flex items-center justify-center gap-1.5 text-[11px] font-bold transition-colors ${item.visibility === 'public' ? 'text-blue-600' : 'text-slate-500'}">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                <path d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3"></path>
-            </svg>
-            Public
-        </button>
+        descInput.addEventListener('input', updatePreviewText);
+        titleInput.addEventListener('input', updatePreviewTitle);
+        tagsInput.addEventListener('input', updatePreviewTags);
+        privacySelect.addEventListener('change', updatePrivacy);
 
-        <button onclick="event.stopPropagation(); setGalleryVisibility(${item.id}, 'private')" 
-                class="relative z-10 flex-1 flex items-center justify-center gap-1.5 text-[11px] font-bold transition-colors ${item.visibility === 'private' ? 'text-slate-900' : 'text-slate-500'}">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-            </svg>
-            Private
-        </button>
-    </div>
+        updatePreviewTitle();
+        updatePreviewText();
+        updatePreviewTags();
+        updatePrivacy();
+        setPostType('post');
 
-    <div class="mt-3 pt-2 border-t border-slate-50">
-        <button onclick="event.stopPropagation(); deleteGalleryItem(${item.id})" 
-                class="w-full flex items-center justify-between px-2 py-2 rounded-5 text-red-500 hover:bg-red-50 transition-all group">
-            <span class="text-[11px] font-black uppercase tracking-tight">Delete Asset</span>
-            <svg class="w-4 h-4 opacity-50 group-hover:opacity-100" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-            </svg>
-        </button>
-    </div>
-</div>
-                            </div>
-                        </div>
-                        <div class="p-3 border-t border-slate-100">
-                            <h4 class="text-xs font-bold truncate text-slate-800">${item.title}</h4>
-                            <p class="text-[10px] text-slate-500 font-semibold mt-1">${item.publishedAt || 'Just now'}</p>
-                        </div>
-                    </div>
-                `;
-                grid.insertAdjacentHTML('beforeend', card);
-            });
-
-            gsap.from("#galleryGrid > div", {
+        if (window.gsap) {
+            gsap.from('section.glass', { opacity: 0, y: 16, duration: 0.45, ease: 'power2.out' });
+            gsap.from('#section-create .editor-panel, #section-create .preview-card', {
                 opacity: 0,
-                y: 20,
-                stagger: 0.05,
-                duration: 0.4,
-                overwrite: "auto",
-                clearProps: "all"
+                y: 18,
+                duration: 0.45,
+                stagger: 0.08,
+                ease: 'power2.out',
+                delay: 0.1
             });
         }
 
-        uploadZone?.addEventListener('click', openMediaPicker);
-        mediaInput?.addEventListener('change', (e) => {
-            const file = e.target.files && e.target.files[0];
-            if (!file) return;
-            renderMediaPreview(file);
-        });
+        if (window.anime) {
+            anime({
+                targets: '.type-pill',
+                translateY: [8, 0],
+                opacity: [0, 1],
+                delay: anime.stagger(60),
+                duration: 400,
+                easing: 'easeOutSine'
+            });
+        }
 
-        publishContentBtn?.addEventListener('click', publishContent);
+        function initThreeBackground() {
+            if (!window.THREE) return;
 
-        window.addEventListener('click', (e) => {
-            if (!e.target.closest('.gallery-menu') && !e.target.closest('button[onclick^="toggleGalleryMenu"]')) {
-                document.querySelectorAll('.gallery-menu').forEach((menu) => menu.classList.add('hidden'));
+            const canvas = document.getElementById('create-bg-canvas');
+            if (!canvas) return;
+
+            const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 120;
+
+            const count = 320;
+            const positions = new Float32Array(count * 3);
+            for (let i = 0; i < count; i += 1) {
+                const idx = i * 3;
+                positions[idx] = (Math.random() - 0.5) * 240;
+                positions[idx + 1] = (Math.random() - 0.5) * 160;
+                positions[idx + 2] = (Math.random() - 0.5) * 140;
             }
-            
-            // Close fullscreen modal when clicking outside the media container
-            const modal = document.getElementById('fullscreenModal');
-            if (modal && e.target === modal) {
-                closeFullscreenViewer();
-            }
-        });
 
-        // Close fullscreen viewer with Escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                const modal = document.getElementById('fullscreenModal');
-                if (modal && modal.classList.contains('active')) {
-                    closeFullscreenViewer();
-                }
-            }
-        });
+            const geometry = new THREE.BufferGeometry();
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 
-        renderHistory();
-        loadHistory();
+            const material = new THREE.PointsMaterial({
+                color: 0x2e87ff,
+                size: 1.35,
+                transparent: true,
+                opacity: 0.5
+            });
+
+            const points = new THREE.Points(geometry, material);
+            scene.add(points);
+
+            function resize() {
+                const width = window.innerWidth;
+                const height = window.innerHeight;
+                renderer.setSize(width, height, false);
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+            }
+
+            function animate() {
+                points.rotation.y += 0.00075;
+                points.rotation.x += 0.0003;
+                renderer.render(scene, camera);
+                window.requestAnimationFrame(animate);
+            }
+
+            window.addEventListener('resize', resize);
+            resize();
+            animate();
+        }
+
+        initThreeBackground();
     </script>
-  <script src="{{ asset('app.js') }}"></script>
-
+    <script src="{{ asset('app.js') }}"></script>
 </body>
 </html>

@@ -233,6 +233,7 @@
   function initDashboardUi() {
     const root = document.documentElement;
     const body = document.body;
+    window.__connectSidebarManagedByHeader = true;
     const sidebar = document.getElementById('sidebar');
     const sidebarToggle = document.getElementById('mobile-sidebar-toggle');
     const themeToggle = document.getElementById('theme-toggle');

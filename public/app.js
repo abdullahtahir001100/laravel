@@ -24,14 +24,15 @@
   // <script>
 
     const sidebar = document.getElementById('sidebar');
+    const sidebarManagedByHeader = Boolean(window.__connectSidebarManagedByHeader);
     let sidebarBackdrop = document.getElementById('sidebar-backdrop');
-    if (!sidebarBackdrop && sidebar) {
+    if (!sidebarManagedByHeader && !sidebarBackdrop && sidebar) {
       sidebarBackdrop = document.createElement('div');
       sidebarBackdrop.id = 'sidebar-backdrop';
       sidebarBackdrop.className = 'fixed inset-0 bg-slate-900/30 z-20 hidden lg:hidden';
       document.body.appendChild(sidebarBackdrop);
     }
-    const mobileSidebarToggle = document.getElementById('mobile-sidebar-toggle');
+    const mobileSidebarToggle = sidebarManagedByHeader ? null : document.getElementById('mobile-sidebar-toggle');
     const userMenuButton = document.getElementById('user-menu-button');
     const userDropdown = document.getElementById('user-dropdown');
     const chevronIcon = document.getElementById('chevron-icon');
@@ -40,69 +41,80 @@
     const mainUserSearch = document.getElementById('main-user-search');
     const userSearchResults = document.getElementById('user-search-results');
 
+    // Debug logging
+    console.log('DOM Elements loaded:', {
+      headerSearchInput: !!headerSearchInput,
+      headerSearchResults: !!headerSearchResults,
+      mainUserSearch: !!mainUserSearch,
+      userSearchResults: !!userSearchResults
+    });
+
     let isMenuOpen = false;
     let sidebarOpen = false;
-
-    const headerSearchItems = [{
-        label: 'Home Feed',
-        target: '#main-feed',
-        type: 'Section'
-      },
-      {
-        label: 'Discover',
-        target: '#discover-nav',
-        type: 'Section'
-      },
-      {
-        label: 'Users Search',
-        target: '#users-search-section',
-        type: 'Section'
-      },
-      {
-        label: 'Suggested Users',
-        target: '#suggested-users-card',
-        type: 'Section'
-      },
-      {
-        label: 'Daily Pulse',
-        target: '#daily-pulse-card',
-        type: 'Section'
-      },
-      {
-        label: 'User Directory Page',
-        target: '/users',
-        type: 'Page'
-      }
-    ];
-
+    let headerContentItems = [];
+    let headerContentLoadedAt = 0;
     let directoryUsers = [];
 
-    function toggleUserMenu() {
-      const menu = document.getElementById('user-dropdown');
-      if (!isMenuOpen) {
-        menu.style.display = 'block';
-        gsap.fromTo(menu, {
-          opacity: 0,
-          y: -10
-        }, {
-          opacity: 1,
-          y: 0,
-          duration: 0.25,
-          ease: 'power2.out'
-        });
-      } else {
-        gsap.to(menu, {
-          opacity: 0,
-          y: -10,
-          duration: 0.2,
-          onComplete: () => menu.style.display = 'none'
-        });
-      }
-      isMenuOpen = !isMenuOpen;
-      if (chevronIcon) chevronIcon.style.transform = isMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+    function escapeHtml(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
 
-    function renderHeaderSearchResults(query) {
+    function routeForContentType(type) {
+      if (type === 'reel') return '/reels';
+      if (type === 'live') return '/live';
+      return '/facebook';
+    }
+
+    async function fetchHeaderContentItems(forceRefresh = false) {
+      const now = Date.now();
+      if (!forceRefresh && headerContentItems.length && (now - headerContentLoadedAt) < 60000) {
+        console.log('Using cached items:', headerContentItems);
+        return headerContentItems;
+      }
+
+      try {
+        // First try to get user's own content for quick search
+        console.log('Fetching user content from /api/content-items');
+        const userResponse = await fetch('/api/content-items', {
+          headers: { Accept: 'application/json' }
+        });
+        
+        if (userResponse.ok) {
+          const userData = await userResponse.json();
+          const userItems = userData.items || [];
+          console.log('User content items:', userItems);
+          
+          headerContentItems = userItems.map((item) => ({
+            id: item.id,
+            label: item.title || 'Untitled',
+            description: item.description || '',
+            tags: Array.isArray(item.tags) ? item.tags : (typeof item.tags === 'string' ? [item.tags] : []),
+            contentType: item.type || 'post',
+            target: routeForContentType(item.type || 'post')
+          }));
+          
+          console.log('Transformed user items:', headerContentItems);
+        }
+        
+        headerContentLoadedAt = now;
+      } catch (error) {
+        console.error('Failed to fetch content items:', error);
+      }
+
+      return headerContentItems;
+    }
+
+    async function renderHeaderSearchResults(query) {
+      if (!headerSearchResults) {
+        console.warn('headerSearchResults element not found');
+        return;
+      }
+
       const q = query.trim().toLowerCase();
       if (!q) {
         headerSearchResults.classList.add('hidden');
@@ -110,21 +122,61 @@
         return;
       }
 
-      const matched = headerSearchItems.filter((item) => item.label.toLowerCase().includes(q));
-      if (!matched.length) {
-        headerSearchResults.classList.remove('hidden');
-        headerSearchResults.innerHTML =
-          '<div class="px-3 py-2 text-sm text-slate-500">No content found</div>';
-        return;
-      }
-
       headerSearchResults.classList.remove('hidden');
-      headerSearchResults.innerHTML = matched.map((item) => (
-        `<button data-target="${item.target}" class="header-result-btn w-full text-left px-3 py-2 rounded-custom hover:bg-slate-50 transition-colors">` +
-        `<p class="text-sm font-semibold text-slate-700">${item.label}</p>` +
-        `<p class="text-[11px] text-slate-500">${item.type}</p>` +
-        `</button>`
-      )).join('');
+      headerSearchResults.innerHTML = '<div class="px-3 py-2 text-sm text-slate-500">Searching...</div>';
+
+      try {
+        const items = await fetchHeaderContentItems();
+        console.log('Search query:', q);
+        console.log('Items available:', items.length);
+        
+        const matched = items.filter((item) => {
+          const title = (item.label || '').toLowerCase();
+          const description = (item.description || '').toLowerCase();
+          const tagsArray = Array.isArray(item.tags) ? item.tags : [];
+          const tagsText = tagsArray.length > 0 ? tagsArray.join(' ').toLowerCase() : '';
+          const typeText = (item.contentType || '').toLowerCase();
+          const matches = title.includes(q) || description.includes(q) || tagsText.includes(q) || typeText.includes(q);
+          return matches;
+        }).slice(0, 8);
+
+        console.log('Matched results:', matched);
+
+        if (!matched.length) {
+          headerSearchResults.innerHTML = '<div class="px-3 py-2 text-sm text-slate-500">No matching content found</div>';
+          return;
+        }
+
+        const html = matched.map((item) => {
+          const tagsHtml = (item.tags && item.tags.length) ? `<div class="flex flex-wrap gap-1 mt-2">${item.tags.slice(0, 4).map((tag) => `<button class="tag-search-btn text-[11px] px-2 py-1 bg-blue-50 text-blue-600 rounded-sm hover:bg-blue-100 transition-colors" data-tag="${escapeHtml(tag)}" type="button">#${escapeHtml(tag)}</button>`).join('')}</div>` : '';
+          return `<button data-target="${item.target}" data-item-id="${item.id}" data-content-type="${item.contentType}" class="header-result-btn w-full text-left px-3 py-2 rounded-custom hover:bg-slate-50 transition-colors block border-b border-slate-100" type="button">
+            <p class="text-sm font-semibold text-slate-700">${escapeHtml(item.label)}</p>
+            <p class="text-[11px] text-slate-500 capitalize">${escapeHtml(item.contentType)}</p>
+            ${tagsHtml}
+          </button>`;
+        }).join('');
+        
+        headerSearchResults.innerHTML = html;
+        console.log('Rendered HTML:', html);
+
+        // Add click handlers for tag search buttons
+        headerSearchResults.querySelectorAll('.tag-search-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const tag = btn.dataset.tag;
+            console.log('Tag clicked:', tag);
+            if (tag && window.loadFeedByTag) {
+              window.loadFeedByTag(tag);
+              headerSearchInput.value = '';
+              headerSearchResults.classList.add('hidden');
+            }
+          });
+        });
+      } catch (error) {
+        console.error('Search error:', error);
+        headerSearchResults.innerHTML = '<div class="px-3 py-2 text-sm text-red-500">Search failed</div>';
+      }
     }
 
     function renderUserSearchResults(list, query = '') {
@@ -171,6 +223,36 @@
       if (isHidden) menu.classList.remove('hidden');
     }
 
+    function findScrollableAncestor(element) {
+      let current = element instanceof Element ? element : null;
+
+      while (current && current !== document.body) {
+        const style = window.getComputedStyle(current);
+        const canScrollY = /(auto|scroll)/.test(style.overflowY) && current.scrollHeight > current.clientHeight + 1;
+
+        if (canScrollY) return current;
+        current = current.parentElement;
+      }
+
+      return null;
+    }
+
+    window.addEventListener('wheel', (event) => {
+      if (event.defaultPrevented || event.ctrlKey) return;
+      if (event.target instanceof Element && event.target.closest('input, textarea, select, [contenteditable="true"]')) return;
+
+      const scrollContainer = findScrollableAncestor(event.target) || document.getElementById('main-feed') || document.querySelector('main.overflow-y-auto');
+      if (!scrollContainer || scrollContainer.scrollHeight <= scrollContainer.clientHeight + 1) return;
+
+      const maxScrollTop = scrollContainer.scrollHeight - scrollContainer.clientHeight;
+      const nextScrollTop = Math.max(0, Math.min(maxScrollTop, scrollContainer.scrollTop + event.deltaY));
+      if (nextScrollTop === scrollContainer.scrollTop) return;
+
+      event.preventDefault();
+      scrollContainer.scrollTop = nextScrollTop;
+    }, { passive: false });
+
+    if (!sidebarManagedByHeader && sidebar) {
     function openSidebar() {
       if (window.innerWidth >= 1024) return;
       if (!sidebar || !sidebarBackdrop) return;
@@ -215,6 +297,29 @@
         onComplete: () => sidebarBackdrop.classList.add('hidden')
       });
       sidebarOpen = false;
+    }
+
+    mobileSidebarToggle?.addEventListener('click', () => {
+      if (sidebarOpen) closeSidebar();
+      else openSidebar();
+    });
+
+    sidebarBackdrop?.addEventListener('click', closeSidebar);
+
+    window.addEventListener('resize', () => {
+      if (!sidebar || !sidebarBackdrop) return;
+      if (window.innerWidth >= 1024) {
+        sidebarBackdrop.classList.add('hidden');
+        sidebar.classList.remove('-translate-x-full');
+        gsap.set(sidebar, {
+          clearProps: 'all'
+        });
+        sidebarOpen = false;
+      } else if (!sidebarOpen) {
+        sidebar.classList.add('-translate-x-full');
+      }
+    });
+
     }
 
     function animateLike(el) {
@@ -395,39 +500,49 @@
       closeModal('share-modal');
     }
 
-    mobileSidebarToggle?.addEventListener('click', () => {
-      if (sidebarOpen) closeSidebar();
-      else openSidebar();
-    });
-
     userMenuButton?.addEventListener('click', (e) => {
       e.stopPropagation();
       toggleUserMenu();
     });
 
-    headerSearchInput?.addEventListener('input', (e) => {
-      renderHeaderSearchResults(e.target.value || '');
+    headerSearchInput?.addEventListener('focus', async (e) => {
+      // Pre-fetch content when search is focused
+      await fetchHeaderContentItems(true);
+      console.log('Search focused, items prefetched');
     });
 
-    headerSearchResults?.addEventListener('click', (e) => {
-      const btn = e.target.closest('.header-result-btn');
-      if (!btn) return;
-      const target = btn.dataset.target;
-      if (!target) return;
+    headerSearchInput?.addEventListener('input', async (e) => {
+      const query = e.target.value || '';
+      await renderHeaderSearchResults(query);
+    });
 
-      if (target.startsWith('#')) {
-        const el = document.querySelector(target);
-        if (el) el.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start'
-        });
+    // Make loadFeedByTag globally available for header search (fallback)
+    if (!window.loadFeedByTag) {
+      window.loadFeedByTag = async function(tag) {
+        window.location.href = `/facebook?tag=${encodeURIComponent(tag)}`;
+      };
+    }
+
+    // Manual testing function - run in browser console: testTagSearch('calligraphy')
+    window.testTagSearch = async function(query) {
+      console.log('=== Testing tag search for:', query);
+      const items = await fetchHeaderContentItems(true);
+      console.log('All items:', items);
+      
+      const filtered = items.filter(item => {
+        const text = (item.label + ' ' + item.description + ' ' + (item.tags || []).join(' ')).toLowerCase();
+        return text.includes(query.toLowerCase());
+      });
+      console.log('Filtered results:', filtered);
+      
+      if (filtered.length) {
+        console.log('✓ Search working! Found', filtered.length, 'items');
+        return filtered;
       } else {
-        window.location.href = target;
+        console.log('✗ No results found for query:', query);
+        return [];
       }
-
-      headerSearchResults.classList.add('hidden');
-      headerSearchInput.value = '';
-    });
+    };
 
     mainUserSearch?.addEventListener('input', async (e) => {
       const query = e.target.value || '';
@@ -442,22 +557,6 @@
       directoryUsers = await fetchDirectoryUsers(q);
       if (directoryUsers.length && directoryUsers[0].profileUrl) {
         window.location.href = directoryUsers[0].profileUrl;
-      }
-    });
-
-    sidebarBackdrop?.addEventListener('click', closeSidebar);
-
-    window.addEventListener('resize', () => {
-      if (!sidebar || !sidebarBackdrop) return;
-      if (window.innerWidth >= 1024) {
-        sidebarBackdrop.classList.add('hidden');
-        sidebar.classList.remove('-translate-x-full');
-        gsap.set(sidebar, {
-          clearProps: 'all'
-        });
-        sidebarOpen = false;
-      } else if (!sidebarOpen) {
-        sidebar.classList.add('-translate-x-full');
       }
     });
 

@@ -172,13 +172,6 @@
     const state = { feed: [], suggestions: [], comments: [], activeItem: null, feedById: new Map() };
     let searchTimer = null;
 
-    const escapeHtml = (value) => String(value ?? '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/\"/g, '&quot;')
-      .replace(/'/g, '&#039;');
-
     function closeModal(id) {
       const modal = document.getElementById(id);
       if (!modal) return;
@@ -272,7 +265,7 @@
           <div class="px-4 pb-3">
             <p class="text-sm text-slate-600 leading-6">${escapeHtml(item.description || item.title || '')}</p>
             ${item.subtitle ? `<p class="text-xs text-slate-400 mt-1">${escapeHtml(item.subtitle)}</p>` : ''}
-            ${tagList ? `<div class="flex flex-wrap gap-2 mt-3">${tagList}</div>` : ''}
+            ${tagList ? `<div class="tag-list flex flex-wrap gap-2 mt-3" data-item-id="${item.id}">${tagList}</div>` : ''}
           </div>
 
           ${mediaMarkup}
@@ -339,13 +332,24 @@
       return response.json();
     }
 
-    async function loadFeed() {
-      const data = await apiFetch('/api/feed?scope=main');
+    async function loadFeed(tag = null) {
+      let url = '/api/feed?scope=main';
+      if (tag) {
+        url += `&tag=${encodeURIComponent(tag)}`;
+        const status = document.getElementById('feed-status');
+        if (status) status.textContent = `Filtering by #${escapeHtml(tag)}`;
+      }
+      const data = await apiFetch(url);
       const items = data.data || [];
       state.feed = items;
       state.feedById = new Map(items.map(item => [item.id, item]));
       renderFeed(items);
     }
+
+    // Make loadFeedByTag globally available for header search
+    window.loadFeedByTag = async function(tag) {
+      window.location.href = `/facebook?tag=${encodeURIComponent(tag)}`;
+    };
 
     async function loadSuggestions() {
       const data = await apiFetch('/api/users/suggestions');
@@ -530,9 +534,27 @@
       }
     });
 
+    // Handle tag clicks on feed items
+    document.addEventListener('click', (e) => {
+      const tagSpan = e.target.closest('span[class*="bg-slate-100"]');
+      if (tagSpan && tagSpan.textContent.startsWith('#')) {
+        const tag = tagSpan.textContent.substring(1).trim();
+        if (tag) {
+          window.location.href = `/facebook?tag=${encodeURIComponent(tag)}`;
+        }
+      }
+    });
+
+    // Check for tag parameter in URL and load filtered feed
+    function loadTagFromUrl() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tag = urlParams.get('tag');
+      return tag ? loadFeed(tag) : loadFeed();
+    }
+
     window.addEventListener('load', async () => {
       try {
-        await Promise.all([loadFeed(), loadSuggestions()]);
+        await Promise.all([loadTagFromUrl(), loadSuggestions()]);
       } catch (error) {
         console.error('Failed to load main page content', error);
         const status = document.getElementById('feed-status');

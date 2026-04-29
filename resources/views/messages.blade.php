@@ -33,6 +33,48 @@
             border-radius: 18px 18px 18px 4px !important; 
         }
 
+        .theme-dark .msg-bubble-them {
+            background: #3a3b3c;
+            color: #e4e6eb;
+        }
+
+        .chat-item.active {
+            background-color: rgba(37, 99, 235, 0.1) !important;
+        }
+
+        .theme-dark #message-container {
+            background-color: var(--bg-main) !important;
+        }
+
+        .theme-dark header.app-header {
+            background-color: rgba(17, 27, 48, 0.8) !important;
+            border-bottom-color: var(--border-main) !important;
+        }
+
+        .theme-dark .bg-slate-50\/50 {
+            background-color: var(--bg-main) !important;
+        }
+
+        .theme-dark .bg-slate-100 {
+            background-color: var(--bg-input) !important;
+        }
+
+        .theme-dark .text-slate-900,
+        .theme-dark .text-slate-800 {
+            color: var(--text-main) !important;
+        }
+
+        .theme-dark .text-slate-600,
+        .theme-dark .text-slate-500,
+        .theme-dark .text-slate-400 {
+            color: var(--text-muted) !important;
+        }
+
+        .theme-dark .border-slate-100,
+        .theme-dark .border-slate-200 {
+            border-color: var(--border-main) !important;
+        }
+
         /* Sidebars */
         .info-sidebar { 
             width: 320px; 
@@ -55,7 +97,9 @@
         }
     </style>
 </head>
-<body class="flex h-screen w-full bg-white">
+<body class="flex h-screen w-full bg-white pt-16">
+    <x-dashboard-header />
+    <x-dashboard-sidebar />
     @php
         $activeFriendName = $activeFriend['displayName'] ?? 'Select a friend';
         $activeFriendInitials = strtoupper(collect(explode(' ', $activeFriendName))
@@ -76,26 +120,26 @@
         };
     </script>
 
-    <aside id="inbox-panel" class="inbox-panel w-[360px] flex flex-col border-r border-gray-200 bg-white transition-transform duration-300">
+    <aside id="inbox-panel" class="inbox-panel w-[360px] flex flex-col border-r border-slate-200 bg-white transition-transform duration-300 card-base">
         <div class="p-4 space-y-4">
             <div class="flex justify-between items-center">
                 <h1 class="text-2xl font-extrabold tracking-tight">Messages</h1>
                 <div class="flex gap-2">
-                    <button class="p-2 bg-gray-100 hover:bg-gray-200 rounded-full"><i data-lucide="settings" class="w-5 h-5 text-gray-600"></i></button>
-                    <button class="p-2 bg-gray-100 hover:bg-gray-200 rounded-full"><i data-lucide="square-pen" class="w-5 h-5 text-gray-600"></i></button>
+                    <button class="p-2 bg-slate-100 hover:bg-slate-200 rounded-full"><i data-lucide="settings" class="w-5 h-5 text-slate-600"></i></button>
+                    <button class="p-2 bg-slate-100 hover:bg-slate-200 rounded-full"><i data-lucide="square-pen" class="w-5 h-5 text-slate-600"></i></button>
                 </div>
             </div>
             <div class="relative group">
-                <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-gray-400 group-focus-within:text-blue-500"></i>
-                <input type="text" placeholder="Search Studio Messenger" class="w-full bg-gray-100 border-none py-2.5 pl-10 pr-4 rounded-full text-sm outline-none focus:ring-2 ring-blue-100">
+                <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-slate-400 group-focus-within:text-blue-500"></i>
+                <input type="text" placeholder="Search Studio Messenger" class="w-full bg-slate-100 border-none py-2.5 pl-10 pr-4 rounded-full text-sm outline-none focus:ring-2 ring-blue-100">
             </div>
         </div>
 
         <div class="flex-1 overflow-y-auto custom-scroll px-2" id="chat-list">
             @forelse($friends as $friend)
-                <div onclick="openChat({{ $friend['id'] }})" class="chat-item {{ ($activeFriend['id'] ?? null) === $friend['id'] ? 'active bg-blue-50' : 'hover:bg-gray-50' }} flex items-center gap-3 p-3 rounded-xl cursor-pointer">
+                <div onclick="openChat({{ $friend['id'] }})" class="chat-item {{ ($activeFriend['id'] ?? null) === $friend['id'] ? 'active bg-blue-50' : 'hover:bg-slate-50' }} flex items-center gap-3 p-3 rounded-xl cursor-pointer">
                     <div class="relative">
-                        <div class="w-14 h-14 {{ ($activeFriend['id'] ?? null) === $friend['id'] ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500' }} rounded-full flex items-center justify-center font-bold text-lg">
+                        <div class="w-14 h-14 {{ ($activeFriend['id'] ?? null) === $friend['id'] ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500' }} rounded-full flex items-center justify-center font-bold text-lg">
                             {{ strtoupper(collect(explode(' ', $friend['displayName']))->filter()->map(fn ($part) => mb_substr($part, 0, 1))->take(2)->implode('')) }}
                         </div>
                         @if(($friend['unreadCount'] ?? 0) > 0)
@@ -104,24 +148,24 @@
                     </div>
                     <div class="flex-1 min-w-0">
                         <div class="flex justify-between items-center">
-                            <h4 class="font-bold text-sm truncate {{ ($activeFriend['id'] ?? null) === $friend['id'] ? 'text-gray-900' : 'text-gray-800' }}">{{ $friend['displayName'] }}</h4>
-                            <span class="text-[11px] {{ ($activeFriend['id'] ?? null) === $friend['id'] ? 'text-blue-600 font-bold' : 'text-gray-400' }}">{{ $friend['lastMessageAt'] ?? 'Now' }}</span>
+                            <h4 class="font-bold text-sm truncate {{ ($activeFriend['id'] ?? null) === $friend['id'] ? 'text-slate-900' : 'text-slate-800' }}">{{ $friend['displayName'] }}</h4>
+                            <span class="text-[11px] {{ ($activeFriend['id'] ?? null) === $friend['id'] ? 'text-blue-600 font-bold' : 'text-slate-400' }}">{{ $friend['lastMessageAt'] ?? 'Now' }}</span>
                         </div>
-                        <p class="text-xs {{ ($activeFriend['id'] ?? null) === $friend['id'] ? 'text-gray-600' : 'text-gray-400' }} truncate font-medium">{{ $friend['lastMessage'] ?? 'Tap to start a secure chat' }}</p>
+                        <p class="text-xs {{ ($activeFriend['id'] ?? null) === $friend['id'] ? 'text-slate-600' : 'text-slate-400' }} truncate font-medium">{{ $friend['lastMessage'] ?? 'Tap to start a secure chat' }}</p>
                     </div>
                     <div class="w-2.5 h-2.5 {{ ($activeFriend['id'] ?? null) === $friend['id'] ? 'bg-blue-600' : 'bg-transparent' }} rounded-full"></div>
                 </div>
             @empty
-                <div class="p-4 text-sm text-gray-500">Only accepted friends appear here. Start by accepting a follow request.</div>
+                <div class="p-4 text-sm text-slate-500">Only accepted friends appear here. Start by accepting a follow request.</div>
             @endforelse
         </div>
     </aside>
 
     <main class="flex-1 flex flex-col relative bg-white overflow-hidden">
         
-        <header class="h-20 border-b border-gray-100 flex items-center justify-between px-6 z-10 bg-white/80 backdrop-blur-md">
+        <header class="h-20 border-b border-slate-100 flex items-center justify-between px-6 z-10 bg-white/80 backdrop-blur-md app-header">
             <div class="flex items-center gap-4">
-                <button onclick="toggleMobileInbox()" class="md:hidden p-2 -ml-2 hover:bg-gray-100 rounded-full">
+                <button onclick="toggleMobileInbox()" class="md:hidden p-2 -ml-2 hover:bg-slate-100 rounded-full">
                     <i data-lucide="chevron-left"></i>
                 </button>
                 <div onclick="toggleInfoSidebar()" class="cursor-pointer group flex items-center gap-3">
@@ -130,7 +174,7 @@
                         <h3 id="active-user-name" class="font-bold text-base leading-none">{{ $activeFriend['displayName'] ?? 'Select a friend' }}</h3>
                         <span class="text-[11px] text-green-500 font-bold uppercase tracking-wider">{{ $activeFriend ? 'Online' : 'Waiting' }}</span>
                     </div>
-                    <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-transform"></i>
+                    <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 group-hover:text-gray-600 transition-transform"></i>
                 </div>
             </div>
             <div class="flex items-center gap-2">
@@ -146,14 +190,14 @@
             </div>
         </header>
 
-        <div id="message-container" class="flex-1 overflow-y-auto custom-scroll p-6 space-y-6 bg-gray-50/50">
-            <div class="flex justify-center"><span class="text-[11px] font-bold text-gray-400 uppercase tracking-widest bg-white px-3 py-1 rounded-full shadow-sm">Today</span></div>
+        <div id="message-container" class="flex-1 overflow-y-auto custom-scroll p-6 space-y-6 bg-slate-50/50">
+            <div class="flex justify-center"><span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest bg-white px-3 py-1 rounded-full shadow-sm card-base">Today</span></div>
 
             @forelse($messages as $message)
                 @if($message->sender_id === $authUserId)
                     @php
                         $tickIcon = $message->status === 'read' ? 'check-check' : 'check';
-                        $tickClass = $message->status === 'read' ? 'text-blue-500' : ($message->status === 'delivered' ? 'text-gray-500' : 'text-gray-300');
+                        $tickClass = $message->status === 'read' ? 'text-blue-500' : ($message->status === 'delivered' ? 'text-slate-500' : 'text-slate-300');
                     @endphp
                     <div class="flex flex-row-reverse items-end gap-3 max-w-[75%] ml-auto group animate-fade-in" data-message-id="{{ $message->id }}">
                         <div class="flex flex-col items-end">
@@ -161,7 +205,7 @@
                                 {{ $message->body }}
                             </div>
                             <div class="flex items-center gap-1 mt-1 mr-1">
-                                <span class="text-[10px] text-gray-400 font-medium">{{ $message->created_at->format('g:i A') }}</span>
+                                <span class="text-[10px] text-slate-400 font-medium">{{ $message->created_at->format('g:i A') }}</span>
                                 <i data-lucide="{{ $tickIcon }}" class="w-3 h-3 {{ $tickClass }}"></i>
                             </div>
                         </div>
@@ -175,61 +219,61 @@
                             <div class="msg-bubble-them p-4 text-sm shadow-sm leading-relaxed">
                                 {{ $message->body }}
                             </div>
-                            <span class="text-[10px] text-gray-400 mt-1 ml-1 font-medium">{{ $message->created_at->format('g:i A') }}</span>
+                            <span class="text-[10px] text-slate-400 mt-1 ml-1 font-medium">{{ $message->created_at->format('g:i A') }}</span>
                         </div>
                     </div>
                 @endif
             @empty
                 <div class="flex h-full items-center justify-center">
-                    <div class="max-w-md rounded-2xl border border-dashed border-gray-200 bg-white p-6 text-center shadow-sm">
-                        <h4 class="text-lg font-bold text-gray-900">No messages yet</h4>
-                        <p class="mt-2 text-sm text-gray-500">Pick a friend from the left and start a secure conversation. Messages are stored in the database and only accepted friends appear here.</p>
+                    <div class="max-w-md rounded-2xl border border-dashed border-slate-200 bg-white p-6 text-center shadow-sm card-base">
+                        <h4 class="text-lg font-bold text-slate-900">No messages yet</h4>
+                        <p class="mt-2 text-sm text-slate-500">Pick a friend from the left and start a secure conversation. Messages are stored in the database and only accepted friends appear here.</p>
                     </div>
                 </div>
             @endforelse
         </div>
 
-        <footer class="p-4 bg-white border-t border-gray-100 relative">
-            <div id="file-preview" class="hidden flex gap-2 p-3 bg-gray-50 rounded-xl mb-3 border border-gray-200 overflow-x-auto"></div>
+        <footer class="p-4 bg-white border-t border-slate-100 relative card-base">
+            <div id="file-preview" class="hidden flex gap-2 p-3 bg-slate-50 rounded-xl mb-3 border border-slate-200 overflow-x-auto"></div>
             
             <!-- Attachment Menu -->
-            <div id="attachment-menu" class="hidden absolute bottom-20 left-4 bg-white border border-gray-100 shadow-xl rounded-xl p-2 flex-col gap-1 z-50">
-                <button onclick="triggerFile('image/*')" class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg text-sm font-medium text-gray-700">
+            <div id="attachment-menu" class="hidden absolute bottom-20 left-4 bg-white border border-slate-100 shadow-xl rounded-xl p-2 flex-col gap-1 z-50 card-base">
+                <button onclick="triggerFile('image/*')" class="flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg text-sm font-medium text-slate-700">
                     <div class="p-2 bg-blue-50 text-blue-600 rounded-lg"><i data-lucide="image" class="w-4 h-4"></i></div> Photos
                 </button>
-                <button onclick="triggerFile('video/*')" class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg text-sm font-medium text-gray-700">
+                <button onclick="triggerFile('video/*')" class="flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg text-sm font-medium text-slate-700">
                     <div class="p-2 bg-purple-50 text-purple-600 rounded-lg"><i data-lucide="video" class="w-4 h-4"></i></div> Videos
                 </button>
-                <button onclick="triggerFile('.pdf,.doc,.docx,.txt')" class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg text-sm font-medium text-gray-700">
+                <button onclick="triggerFile('.pdf,.doc,.docx,.txt')" class="flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg text-sm font-medium text-slate-700">
                     <div class="p-2 bg-orange-50 text-orange-600 rounded-lg"><i data-lucide="file-text" class="w-4 h-4"></i></div> Documents
                 </button>
             </div>
 
             <!-- Emoji Picker -->
-            <div id="emoji-picker" class="hidden absolute bottom-20 right-20 bg-white border border-gray-100 shadow-xl rounded-xl p-3 grid grid-cols-6 gap-2 z-50">
+            <div id="emoji-picker" class="hidden absolute bottom-20 right-20 bg-white border border-slate-100 shadow-xl rounded-xl p-3 grid grid-cols-6 gap-2 z-50 card-base">
                 <!-- Simple static emojis for demo -->
-                <button onclick="addEmoji('👍')" class="hover:bg-gray-100 p-2 rounded text-xl">👍</button>
-                <button onclick="addEmoji('😂')" class="hover:bg-gray-100 p-2 rounded text-xl">😂</button>
-                <button onclick="addEmoji('❤️')" class="hover:bg-gray-100 p-2 rounded text-xl">❤️</button>
-                <button onclick="addEmoji('🔥')" class="hover:bg-gray-100 p-2 rounded text-xl">🔥</button>
-                <button onclick="addEmoji('😊')" class="hover:bg-gray-100 p-2 rounded text-xl">😊</button>
-                <button onclick="addEmoji('💯')" class="hover:bg-gray-100 p-2 rounded text-xl">💯</button>
-                <button onclick="addEmoji('✨')" class="hover:bg-gray-100 p-2 rounded text-xl">✨</button>
-                <button onclick="addEmoji('👏')" class="hover:bg-gray-100 p-2 rounded text-xl">👏</button>
-                <button onclick="addEmoji('🎉')" class="hover:bg-gray-100 p-2 rounded text-xl">🎉</button>
-                <button onclick="addEmoji('🙏')" class="hover:bg-gray-100 p-2 rounded text-xl">🙏</button>
-                <button onclick="addEmoji('🤔')" class="hover:bg-gray-100 p-2 rounded text-xl">🤔</button>
-                <button onclick="addEmoji('👀')" class="hover:bg-gray-100 p-2 rounded text-xl">👀</button>
+                <button onclick="addEmoji('👍')" class="hover:bg-slate-100 p-2 rounded text-xl">👍</button>
+                <button onclick="addEmoji('😂')" class="hover:bg-slate-100 p-2 rounded text-xl">😂</button>
+                <button onclick="addEmoji('❤️')" class="hover:bg-slate-100 p-2 rounded text-xl">❤️</button>
+                <button onclick="addEmoji('🔥')" class="hover:bg-slate-100 p-2 rounded text-xl">🔥</button>
+                <button onclick="addEmoji('😊')" class="hover:bg-slate-100 p-2 rounded text-xl">😊</button>
+                <button onclick="addEmoji('💯')" class="hover:bg-slate-100 p-2 rounded text-xl">💯</button>
+                <button onclick="addEmoji('✨')" class="hover:bg-slate-100 p-2 rounded text-xl">✨</button>
+                <button onclick="addEmoji('👏')" class="hover:bg-slate-100 p-2 rounded text-xl">👏</button>
+                <button onclick="addEmoji('🎉')" class="hover:bg-slate-100 p-2 rounded text-xl">🎉</button>
+                <button onclick="addEmoji('🙏')" class="hover:bg-slate-100 p-2 rounded text-xl">🙏</button>
+                <button onclick="addEmoji('🤔')" class="hover:bg-slate-100 p-2 rounded text-xl">🤔</button>
+                <button onclick="addEmoji('👀')" class="hover:bg-slate-100 p-2 rounded text-xl">👀</button>
             </div>
 
             <div class="flex items-center gap-2">
-                <button onclick="toggleAttachmentMenu()" class="p-2.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all">
+                <button onclick="toggleAttachmentMenu()" class="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all">
                     <i data-lucide="plus-circle" class="w-6 h-6"></i>
                 </button>
                 <div class="flex-1 relative">
                     <input type="text" id="chat-input" placeholder="Type a message..." 
-                        class="w-full bg-gray-100 border-none py-3 px-5 pr-12 rounded-2xl text-sm outline-none focus:bg-gray-200/50 transition-all">
-                    <button onclick="toggleEmojiPicker()" class="absolute right-3 top-2 text-gray-400 hover:text-blue-600"><i data-lucide="smile" class="w-5 h-5"></i></button>
+                        class="w-full bg-slate-100 border-none py-3 px-5 pr-12 rounded-2xl text-sm outline-none focus:bg-slate-200/50 transition-all">
+                    <button onclick="toggleEmojiPicker()" class="absolute right-3 top-2 text-slate-400 hover:text-blue-600"><i data-lucide="smile" class="w-5 h-5"></i></button>
                 </div>
                 <button onclick="handleSend()" class="p-3 bg-blue-600 text-white hover:bg-blue-700 rounded-xl shadow-lg shadow-blue-200 transition-all">
                     <i data-lucide="send-horizontal" class="w-5 h-5"></i>
@@ -238,9 +282,9 @@
             <input type="file" id="hidden-file" class="hidden" multiple onchange="previewFiles(this)">
         </footer>
 
-        <aside id="info-sidebar" class="info-sidebar absolute right-0 top-0 h-full bg-white border-l border-gray-100 flex flex-col z-40 shadow-2xl">
-            <div class="p-6 border-b border-gray-50 flex flex-col items-center text-center">
-                <button onclick="toggleInfoSidebar()" class="absolute top-4 left-4 p-2 hover:bg-gray-100 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
+        <aside id="info-sidebar" class="info-sidebar absolute right-0 top-0 h-full bg-white border-l border-slate-100 flex flex-col z-40 shadow-2xl card-base">
+            <div class="p-6 border-b border-slate-50 flex flex-col items-center text-center">
+                <button onclick="toggleInfoSidebar()" class="absolute top-4 left-4 p-2 hover:bg-slate-100 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
                 <div class="w-24 h-24 bg-blue-600 rounded-full flex items-center justify-center text-white text-3xl font-bold mb-4 shadow-xl shadow-blue-100">IB</div>
                 <h4 class="font-extrabold text-lg" id="side-name">InkByHand Store</h4>
                 <p class="text-xs text-green-500 font-bold uppercase tracking-widest mt-1">Active Now</p>
@@ -248,22 +292,22 @@
 
             <div class="flex-1 overflow-y-auto custom-scroll p-4 space-y-6">
                 <div>
-                    <h5 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Shared Media</h5>
+                    <h5 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Shared Media</h5>
                     <div class="grid grid-cols-3 gap-2">
-                        <div class="aspect-square bg-gray-100 rounded-lg hover:opacity-80 cursor-pointer"></div>
-                        <div class="aspect-square bg-gray-100 rounded-lg hover:opacity-80 cursor-pointer"></div>
-                        <div class="aspect-square bg-gray-100 rounded-lg hover:opacity-80 cursor-pointer"></div>
+                        <div class="aspect-square bg-slate-100 rounded-lg hover:opacity-80 cursor-pointer"></div>
+                        <div class="aspect-square bg-slate-100 rounded-lg hover:opacity-80 cursor-pointer"></div>
+                        <div class="aspect-square bg-slate-100 rounded-lg hover:opacity-80 cursor-pointer"></div>
                     </div>
                 </div>
 
                 <div class="space-y-1">
-                    <h5 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Settings</h5>
-                    <button onclick="toggleMute()" class="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-xl transition-all">
+                    <h5 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Settings</h5>
+                    <button onclick="toggleMute()" class="w-full flex items-center justify-between p-3 hover:bg-slate-50 rounded-xl transition-all">
                         <div class="flex items-center gap-3">
-                            <i data-lucide="bell" id="mute-icon" class="w-5 h-5 text-gray-500"></i>
+                            <i data-lucide="bell" id="mute-icon" class="w-5 h-5 text-slate-500"></i>
                             <span class="text-sm font-semibold" id="mute-text">Mute Notifications</span>
                         </div>
-                        <div id="mute-toggle" class="w-10 h-5 bg-gray-200 rounded-full relative transition-colors"><div id="mute-toggle-thumb" class="absolute left-1 top-1 w-3 h-3 bg-white rounded-full transition-transform"></div></div>
+                        <div id="mute-toggle" class="w-10 h-5 bg-slate-200 rounded-full relative transition-colors"><div id="mute-toggle-thumb" class="absolute left-1 top-1 w-3 h-3 bg-white rounded-full transition-transform"></div></div>
                     </button>
                     <button onclick="confirmBlock()" class="w-full flex items-center gap-3 p-3 hover:bg-red-50 rounded-xl text-red-500 transition-colors">
                         <i data-lucide="slash" class="w-5 h-5"></i>

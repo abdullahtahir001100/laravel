@@ -321,7 +321,12 @@
                             <div class="flex items-center gap-3 mb-3">
                                 <img src="${item.authorAvatarUrl}" class="w-10 h-10 rounded-full border-2 border-white">
                                 <span class="text-sm font-bold shadow-black drop-shadow-md cursor-pointer hover:text-blue-300" onclick="window.location.href='${item.authorProfileUrl}'">${item.authorName}</span>
-                                <button class="bg-transparent border border-white text-[10px] font-bold uppercase px-3 py-1 rounded-custom hover:bg-white hover:text-black transition-colors">Follow</button>
+                                ${item.isFriend ? 
+                                  `<button onclick="window.location.href='/messages'" class="bg-blue-400 text-black text-[10px] font-bold uppercase px-3 py-1 rounded-custom hover:bg-blue-300 transition-colors">Message</button>` :
+                                  (item.authorFollowStatus === 'requested' && item.authorFollowId ? 
+                                    `<button data-user-id="${item.userId}" data-follow-id="${item.authorFollowId}" data-follow-status="requested" onclick="cancelReelFollow(${item.userId}, ${item.authorFollowId}, this)" class="bg-amber-400 text-black text-[10px] font-bold uppercase px-3 py-1 rounded-custom hover:bg-amber-300 transition-colors">Cancel</button>` :
+                                    `<button data-user-id="${item.userId}" data-follow-id="${item.authorFollowId || ''}" data-follow-status="${item.authorFollowStatus || 'none'}" onclick="toggleReelFollow(${item.userId}, this)" class="bg-transparent border border-white text-[10px] font-bold uppercase px-3 py-1 rounded-custom hover:bg-white hover:text-black transition-colors">${item.authorFollowLabel || 'Follow'}</button>`)
+                                }
                             </div>
                             <p class="text-sm text-white/90 line-clamp-2 drop-shadow-md">${item.description || item.title || ''}</p>
                         </div>
@@ -385,6 +390,53 @@
         }, { threshold: 0.6 });
 
         videos.forEach(video => observer.observe(video));
+    }
+
+    async function toggleReelFollow(userId, button) {
+        const currentStatus = button?.dataset?.followStatus || 'none';
+        try {
+            const response = await fetch(`/api/users/${userId}/follow`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': CSRF_TOKEN,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            });
+            const data = await response.json();
+            
+            if (response.ok) {
+                button.dataset.followStatus = data.status || 'none';
+                button.dataset.followId = data.followId || '';
+                button.textContent = data.buttonLabel || 'Follow';
+                
+                // Change button styling based on status
+                button.className = 'text-[10px] font-bold uppercase px-3 py-1 rounded-custom transition-colors ' +
+                    (data.status === 'requested' ? 'bg-amber-400 text-black hover:bg-amber-300' : 
+                     data.status === 'accepted' ? 'bg-emerald-400 text-black hover:bg-emerald-300' :
+                     'bg-transparent border border-white text-white hover:bg-white hover:text-black');
+            }
+        } catch (error) {
+            console.error('Follow toggle failed', error);
+        }
+    }
+
+    async function cancelReelFollow(userId, followId, button) {
+        try {
+            const response = await fetch(`/api/follows/${followId}/cancel`, {
+                method: 'DELETE',
+                headers: { 'X-CSRF-TOKEN': CSRF_TOKEN }
+            });
+
+            if (response.ok) {
+                button.dataset.followStatus = 'none';
+                button.dataset.followId = '';
+                button.textContent = 'Follow';
+                button.className = 'bg-transparent border border-white text-[10px] font-bold uppercase px-3 py-1 rounded-custom hover:bg-white hover:text-black transition-colors';
+            }
+        } catch (error) {
+            console.error('Cancel follow failed', error);
+        }
     }
 
     function toggleReelLike(itemId) {

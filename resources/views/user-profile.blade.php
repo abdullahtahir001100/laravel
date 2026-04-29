@@ -80,7 +80,10 @@
 </head>
 
 <body class="overflow-x-hidden" data-own-profile="{{ $isOwnProfile ? '1' : '0' }}" data-user-id="{{ $profileUser?->id ?? '' }}">
-    <div class="w-full min-h-screen">
+    <x-dashboard-header />
+    <div class="flex">
+        <x-dashboard-sidebar />
+        <div class="flex-1 w-full min-h-screen pt-16 overflow-y-auto">
        
 
         <section class="max-w-[1600px] mx-auto px-4 md:px-8 pt-4">
@@ -162,7 +165,7 @@
         </section>
 
         <main class="max-w-[1600px] mx-auto px-4 md:px-8 py-6 grid grid-cols-1 xl:grid-cols-12 gap-6">
-            <aside class="xl:col-span-4 space-y-6 xl:sticky xl:top-2 self-start max-h-[calc(100vh-2rem)] overflow-y-auto soft-scroll pr-1">
+            <aside class="xl:col-span-4 space-y-6 xl:sticky xl:top-20 self-start max-h-[calc(100vh-6rem)] overflow-y-auto soft-scroll pr-1">
                 <section id="about-section" class="card-base p-5">
                     <h3 class="font-bold text-xl mb-4">About</h3>
                     <div class="space-y-3 text-sm text-slate-700">
@@ -247,6 +250,7 @@
                 </section>
             </section>
         </main>
+    </div>
     </div>
 
     <div id="share-popup" class="hidden fixed inset-0 z-50 bg-slate-900/35 p-4">
