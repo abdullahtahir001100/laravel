@@ -34,7 +34,7 @@
 
 <aside
     id="sidebar"
-    class="fixed lg:sticky top-16 left-0 h-[calc(100vh-4rem)] lg:h-[calc(100vh-4rem)] w-72 lg:w-64 border-r border-slate-200 bg-white z-30 -translate-x-full lg:translate-x-0 transition-transform shadow-none self-start"
+    class="fixed top-16 left-0 h-[calc(100vh-4rem)] w-72 lg:w-64 border-r border-slate-200 bg-white z-30 -translate-x-full transition-transform duration-200 shadow-none self-start"
 >
     @php
         $isRoute = fn (...$names) => request()->routeIs(...$names);
