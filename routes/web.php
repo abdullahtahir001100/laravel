@@ -89,11 +89,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/followers', [SocialController::class, 'followers'])->name('api.followers');
     Route::get('/api/following', [SocialController::class, 'following'])->name('api.following');
     Route::get('/api/notifications', [SocialController::class, 'notifications'])->name('api.notifications');
+    Route::delete('/api/notifications/{notification}', [SocialController::class, 'dismissNotification'])->name('api.notifications.dismiss');
 
     // Logout Action
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
 
-Route::get('/test', function () {
-    return view('welcome');
-});

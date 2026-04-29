@@ -19,20 +19,19 @@
     <style>
         :root {
             --brand: #1665d8;
-            --page-bg: #f4f6fb;
-            --card-bg: #ffffff;
-            --border: #e2e8f0;
-            --text: #0f172a;
-            --muted: #64748b;
         }
         #profile-preview{
         border-radius: 9999px !important;
         }
 
         body {
-            background: radial-gradient(circle at top right, #e8f1ff 0%, #f4f6fb 50%, #f8fbff 100%);
-            color: var(--text);
+            background: var(--bg-main);
+            color: var(--text-main);
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .theme-dark body {
+            background: var(--bg-main) !important;
         }
 
         .rounded-custom {
@@ -40,15 +39,15 @@
         }
 
         .card-base {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
+            background: var(--bg-card);
+            border: 1px solid var(--border-main);
             border-radius: 5px;
         }
 
         .section-tab.active {
             color: var(--brand);
             border-bottom: 3px solid var(--brand);
-            background: #eff6ff;
+            background: rgba(37, 99, 235, 0.1);
         }
 
         .hide-scroll::-webkit-scrollbar {

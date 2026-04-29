@@ -255,6 +255,13 @@ class SocialController extends Controller
             'accepted_at' => now(),
         ]);
 
+        // Delete the follow request notification
+        UserNotification::query()
+            ->where('recipient_id', $request->user()->id)
+            ->where('actor_id', $follow->follower_id)
+            ->where('type', 'follow_request')
+            ->delete();
+
         UserNotification::create([
             'recipient_id' => $follow->follower_id,
             'actor_id' => $request->user()->id,
@@ -384,6 +391,13 @@ class SocialController extends Controller
     {
         // Check if the user is the one being followed (they're rejecting the request)
         abort_unless($follow->following_id === $request->user()->id, 403);
+
+        // Delete the follow request notification
+        UserNotification::query()
+            ->where('recipient_id', $request->user()->id)
+            ->where('actor_id', $follow->follower_id)
+            ->where('type', 'follow_request')
+            ->delete();
 
         $follow->delete();
 
@@ -593,6 +607,16 @@ class SocialController extends Controller
         };
     }
 
+    public function dismissNotification(Request $request, UserNotification $notification): JsonResponse
+    {
+        // Verify that the user is the recipient of this notification+
+        abort_unless($notification->recipient_id === $request->user()->id, 403);
+
+        $notification->delete();
+
+        return response()->json(['message' => 'Notification dismissed']);
+    }
+
     private function userPayload(User $user, int $authUserId): array
     {
         $displayName = $user->display_name
@@ -626,3 +650,5 @@ class SocialController extends Controller
     }
     
 }
+  
+    

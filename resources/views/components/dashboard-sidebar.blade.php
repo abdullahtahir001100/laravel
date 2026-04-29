@@ -12,23 +12,28 @@
         padding: 0.625rem 0.75rem;
         font-size: 0.875rem;
         font-weight: 500;
-        color: #475569; /* slate-600 */
+        color: var(--text-muted); 
         transition: all 0.2s;
     }
 
     .nav-link:hover {
-        background-color: #f8fafc; /* slate-50 */
-        color: #1e293b; /* slate-900 */
+        background-color: var(--bg-input); 
+        color: var(--text-main); 
     }
 
     .nav-link.active {
-        background-color: #eff6ff; /* blue-50 */
-        color: #1d4ed8; /* blue-700 */
+        background-color: rgba(37, 99, 235, 0.1); 
+        color: #3b82f6; 
     }
 
     .nav-link svg {
         width: 1.25rem;
         height: 1.25rem;
+    }
+    
+    .theme-dark .nav-link.active {
+        background-color: rgba(59, 130, 246, 0.2) !important;
+        color: #60a5fa !important;
     }
 </style>
 

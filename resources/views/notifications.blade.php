@@ -233,6 +233,33 @@
             }
         }
 
+        async function dismissNotification(notifId) {
+            try {
+                const response = await fetch(`/api/notifications/${notifId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': CSRF_TOKEN,
+                    },
+                });
+
+                if (response.ok) {
+                    const notifItem = document.querySelector(`[data-notif-id="${notifId}"]`);
+                    if (notifItem) {
+                        gsap.to(notifItem, {
+                            opacity: 0,
+                            x: -20,
+                            duration: 0.3,
+                            onComplete: () => notifItem.remove(),
+                        });
+                    }
+                    // Optional: Update the local notifications array to keep filters in sync
+                    notifications = notifications.filter(n => n.id !== notifId);
+                }
+            } catch (err) {
+                console.error('Error dismissing notification:', err);
+            }
+        }
+
         function renderFeed(type = 'all') {
             const wrapper = document.getElementById('notifWrapper');
             
@@ -272,7 +299,7 @@
                             ` : `
                                 <button class="bg-slate-100 px-5 py-2 text-[10px] font-black uppercase hover:bg-slate-200 transition-all">View</button>
                             `}
-                            <button onclick="this.closest('.notif-item').remove()" class="p-2 text-slate-300 hover:text-red-500">
+                            <button onclick="dismissNotification(${n.id})" class="p-2 text-slate-300 hover:text-red-500">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="3"></path></svg>
                             </button>
                         </div>

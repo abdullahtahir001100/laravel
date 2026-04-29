@@ -9,12 +9,7 @@
 	<style>
 		:root {
 			--brand: #0f62fe;
-			--brand-soft: #eaf2ff;
-			--line: #d8e2f0;
-			--text: #0f172a;
-			--muted: #5d6b82;
-			--bg: #f2f7ff;
-			--card: #ffffff;
+			--brand-soft: rgba(15, 98, 254, 0.1);
 			--ok: #0e9f6e;
 			--warn: #d97706;
 			--danger: #dc2626;
@@ -22,17 +17,18 @@
 
 		body {
 			font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-			background:
-				radial-gradient(900px 580px at 5% -15%, #d7ecff 0%, transparent 62%),
-				radial-gradient(880px 500px at 95% -10%, #dff8e8 0%, transparent 60%),
-				var(--bg);
-			color: var(--text);
+			background: var(--bg-main);
+			color: var(--text-main);
+		}
+
+		.theme-dark body {
+			background: var(--bg-main) !important;
 		}
 
 		.panel {
-			border: 1px solid var(--line);
+			border: 1px solid var(--border-main);
 			border-radius: 5px;
-			background: var(--card);
+			background: var(--bg-card);
 		}
 
 		.radius-5 {
@@ -41,8 +37,8 @@
 
 		.left-nav-item.active {
 			background: var(--brand-soft);
-			border-color: #bfd5ff;
-			color: #114fc7;
+			border-color: var(--brand);
+			color: var(--brand);
 			font-weight: 700;
 		}
 
@@ -50,20 +46,20 @@
 		.form-select,
 		.form-textarea {
 			width: 100%;
-			border: 1px solid var(--line);
+			border: 1px solid var(--border-main);
 			border-radius: 5px;
 			padding: 10px 12px;
 			font-size: 14px;
 			outline: none;
 			transition: border-color 0.2s ease, box-shadow 0.2s ease;
-			background: #fff;
+			background: var(--bg-input);
+			color: var(--text-main);
 		}
 
 		.form-input:focus,
 		.form-select:focus,
-		const SETTINGS_KEYS = Object.keys(DEFAULT_VALUES).filter((key) => !PROFILE_KEYS.includes(key));
 		.form-textarea:focus {
-			border-color: #7db1ff;
+			border-color: var(--brand);
 			box-shadow: 0 0 0 3px rgba(15, 98, 254, 0.12);
 		}
 
@@ -77,8 +73,8 @@
 			width: 44px;
 			height: 24px;
 			border-radius: 999px;
-			border: 1px solid #becde2;
-			background: #c7d2e3;
+			border: 1px solid var(--border-main);
+			background: var(--bg-input);
 			position: relative;
 			cursor: pointer;
 			transition: all 0.2s ease;
@@ -106,12 +102,12 @@
 		}
 
 		.pill {
-			border: 1px solid var(--line);
-			background: #f8fbff;
+			border: 1px solid var(--border-main);
+			background: var(--bg-input);
 			border-radius: 999px;
 			padding: 5px 10px;
 			font-size: 11px;
-			color: #3b4a63;
+			color: var(--text-muted);
 			font-weight: 600;
 		}
 	</style>

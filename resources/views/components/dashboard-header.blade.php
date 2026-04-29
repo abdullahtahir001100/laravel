@@ -1,42 +1,98 @@
 <style>
+  :root {
+    --bg-main: #f6f8fc;
+    --bg-card: #ffffff;
+    --bg-input: #f8fafc;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --border-main: #e2e8f0;
+  }
+
   .theme-dark {
+    --bg-main: #0b1220;
+    --bg-card: #111b30;
+    --bg-input: #1e293b;
+    --text-main: #f1f5f9;
+    --text-muted: #94a3b8;
+    --border-main: #1e293b;
     color-scheme: dark;
-    background: #0b1220;
-    color: #e2e8f0;
   }
 
   .theme-dark body {
-    background: radial-gradient(circle at top left, rgba(14, 165, 233, 0.12), transparent 35%), #0b1220 !important;
-    color: #e2e8f0 !important;
+    background: radial-gradient(circle at top left, rgba(14, 165, 233, 0.12), transparent 35%), var(--bg-main) !important;
+    color: var(--text-main) !important;
   }
 
+  /* Card and Background Overrides */
   .theme-dark .bg-white,
-  .theme-dark [class*="bg-white"] {
-    background-color: #111b30 !important;
+  .theme-dark .soft-card,
+  .theme-dark .card-base,
+  .theme-dark .app-header,
+  .theme-dark #sidebar,
+  .theme-dark #user-dropdown {
+    background-color: var(--bg-card) !important;
+    background: var(--bg-card) !important;
   }
 
   .theme-dark .bg-slate-50,
   .theme-dark .bg-slate-100,
-  .theme-dark [class*="bg-slate-50"],
-  .theme-dark [class*="bg-slate-100"] {
-    background-color: #18253f !important;
+  .theme-dark .bg-slate-200 {
+    background-color: var(--bg-input) !important;
   }
 
+  /* Text Overrides */
   .theme-dark .text-slate-900,
   .theme-dark .text-slate-800,
   .theme-dark .text-slate-700,
   .theme-dark .text-slate-600,
-  .theme-dark .text-slate-500,
-  .theme-dark .text-slate-400 {
-    color: #d1d5db !important;
+  .theme-dark .text-black,
+  .theme-dark h1, 
+  .theme-dark h2, 
+  .theme-dark h3, 
+  .theme-dark h4 {
+    color: var(--text-main) !important;
   }
 
-  .theme-dark .border-slate-50,
+  .theme-dark .text-slate-500,
+  .theme-dark .text-slate-400 {
+    color: var(--text-muted) !important;
+  }
+
+  /* Border Overrides */
   .theme-dark .border-slate-100,
   .theme-dark .border-slate-200,
   .theme-dark .border-slate-300,
-  .theme-dark [class*="border-slate-"] {
-    border-color: #2a3a5b !important;
+  .theme-dark .border-slate-400,
+  .theme-dark .border,
+  .theme-dark hr {
+    border-color: var(--border-main) !important;
+  }
+
+  /* Form Elements */
+  .theme-dark input,
+  .theme-dark textarea,
+  .theme-dark select {
+    background-color: var(--bg-input) !important;
+    color: var(--text-main) !important;
+    border-color: var(--border-main) !important;
+  }
+
+  .theme-dark input::placeholder {
+    color: var(--text-muted) !important;
+    opacity: 0.7;
+  }
+
+  /* Navigation Links */
+  .theme-dark .nav-link {
+    color: var(--text-muted) !important;
+  }
+  .theme-dark .nav-link:hover {
+    background-color: var(--bg-input) !important;
+    color: var(--text-main) !important;
+  }
+  .theme-dark .nav-link.active {
+    background-color: rgba(37, 99, 235, 0.1) !important;
+    color: #60a5fa !important;
   }
 
   .app-header {
@@ -108,7 +164,7 @@
       <svg id="theme-toggle-sun" class="w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364 6.364l-1.414-1.414M7.05 7.05 5.636 5.636m12.728 0L16.95 7.05M7.05 16.95l-1.414 1.414M12 16a4 4 0 100-8 4 4 0 000 8z"></path>
       </svg>
-      <svg id="theme-toggle-moon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg id="theme-toggle-moon" class="w-4 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9 9 0 1012 21a8.96 8.96 0 008.354-5.646z"></path>
       </svg>
     </button>

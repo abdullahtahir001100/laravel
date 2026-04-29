@@ -10,8 +10,6 @@
   <style>
     :root {
       --brand-blue: #0062ff;
-      --bg-main: #f6f8fc;
-      --border-clr: #e5eef9;
     }
     .stickey{
       position: sticky;
@@ -21,17 +19,19 @@
 
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
-      background:
-        radial-gradient(circle at top left, rgba(0, 98, 255, 0.08), transparent 30%),
-        linear-gradient(180deg, #ffffff 0%, #f6f8fc 100%);
-      color: #0f172a;
+      background: var(--bg-main);
+      color: var(--text-main);
+    }
+
+    .theme-dark body {
+      background: var(--bg-main) !important;
     }
 
     .rounded-custom { border-radius: 5px !important; }
     .soft-card {
-      background: rgba(255, 255, 255, 0.92);
+      background: var(--bg-card);
       backdrop-filter: blur(10px);
-      border: 1px solid rgba(226, 232, 240, 0.85);
+      border: 1px solid var(--border-main);
       box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
     }
     .comment-row { border-left: 2px solid #dbeafe; padding-left: 10px; }
