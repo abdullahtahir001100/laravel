@@ -93,5 +93,28 @@ Route::middleware('auth')->group(function () {
 
     // Logout Action
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Admin Routes
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('/dashboard', [\App\Http\Controllers\AdminController::class, 'dashboard'])->name('dashboard');
+        
+        // Users
+        Route::get('/users', [\App\Http\Controllers\AdminController::class, 'users'])->name('users');
+        Route::get('/users/{user}/edit', [\App\Http\Controllers\AdminController::class, 'editUser'])->name('users.edit');
+        Route::put('/users/{user}', [\App\Http\Controllers\AdminController::class, 'updateUser'])->name('users.update');
+        Route::delete('/users/{user}', [\App\Http\Controllers\AdminController::class, 'deleteUser'])->name('users.destroy');
+
+        // Content
+        Route::get('/posts', [\App\Http\Controllers\AdminController::class, 'posts'])->name('posts');
+        Route::get('/reels', [\App\Http\Controllers\AdminController::class, 'reels'])->name('reels');
+        Route::get('/lives', [\App\Http\Controllers\AdminController::class, 'lives'])->name('lives');
+        Route::get('/content/{contentItem}/edit', [\App\Http\Controllers\AdminController::class, 'editContent'])->name('content.edit');
+        Route::put('/content/{contentItem}', [\App\Http\Controllers\AdminController::class, 'updateContent'])->name('content.update');
+        Route::delete('/content/{contentItem}', [\App\Http\Controllers\AdminController::class, 'deleteContent'])->name('content.destroy');
+    });
 });
 
